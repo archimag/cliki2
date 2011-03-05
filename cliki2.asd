@@ -10,14 +10,15 @@
     ((:module "src"
               :components
               ((:file "defmodule")
+               (:file "sendmail" :depends-on ("defmodule"))
                (:file "model" :depends-on ("defmodule"))
                (:file "markup" :depends-on ("defmodule"))
-               (:file "render" :depends-on ("model" "markup"))
-               (:file "sendmail" :depends-on ("defmodule"))
+               (:file "view" :depends-on ("model" "markup"))
+               (:file "auth-core" :depends-on ("model"))
                (:module "routes"
                         :components
                         ((:file "entry")
                          (:file "articles")
                          (:file "person")
                          (:file "auth"))
-                        :depends-on ("render" "sendmail"))))))
+                        :depends-on ("view" "sendmail" "auth-core"))))))
