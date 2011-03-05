@@ -158,8 +158,9 @@
   (cliki2.view:view-person
      (list* :title name
             :content (render-handle-markup drawer (user-info person))
-            :edit-link (if (string= name (user-name *user*))
-                             (restas:genurl 'edit-person :name name))
+            :edit-link (if (and *user*
+                                (string= name (user-name *user*)))
+                           (restas:genurl 'edit-person :name name))
             (user-info-links))))
 
 ;; edit-person-page

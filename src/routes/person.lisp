@@ -9,8 +9,9 @@
 
 (defun check-owner-person (person)
   (check-person person)
-  (unless (string= (user-name *user*)
-                   (user-name person))
+  (unless (and *user*
+               (string= (user-name *user*)
+                        (user-name person)))
       (restas:abort-route-handler hunchentoot:+http-forbidden+))
   person)
 
