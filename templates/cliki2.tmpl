@@ -18,7 +18,7 @@
             <div class="top">
                 {if $user.name}
                     <div id="login">
-                        <strong>{$user.name}</strong> | 
+                        <a href="{$user.href}">{$user.name}</a> | 
                         <a href="{$user.signOut}" id="logout">Sign Out</a>
                     </div>
                 {else}
@@ -131,13 +131,13 @@
 {template view-article-history}
     {call base}
         {param title: 'History of article: ' + $title /}
-
+        {param user: $user /}
         {param body}
             <ul>
                 {foreach $revision in $history}
                     <li>
                         <a href="{$revision.href}">{$revision.date}</a>
-                        {$revision.author}
+                        <a href="{$revision.author.href}">{$revision.author.name}</a>
                     </li>
                 {/foreach}
             </ul>
@@ -344,4 +344,55 @@
     <div>
         Congratulations on your successful registration
     </div>
+{/template}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Person templates
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+{template view-person}
+    {call base}
+        {param title: $title /}
+        {param user: $user /}
+        {param body}
+            <div class="content">
+                {$content |noAutoescape}
+            </div>
+
+            {if $editLink}
+                <div id="footer">
+                    <a href="{$editLink}">Edit</a>
+                </div>
+            {/if}
+        {/param}
+    {/call}
+{/template}
+
+
+{template edit-person}
+    {call base}
+        {param title: 'Edit ' + $title /}
+        {param user: $user /}
+        {param body}
+            <form method="post">
+                <form  method="post">
+                    <div class="textarea">
+                        <textarea rows="30" cols="80" name="content">
+                            {nil}{$content}{nil}
+                        </textarea>
+                    </div>
+                    
+                    <div class="edit-buttons">
+                        <input type="submit" value="Save" name="save" />
+                        <input type="submit" value="Preview" name="preview" />
+                        <input type="submit" value="Cancel" name="cancel" />
+                    </div>
+                </form>
+
+                {if $preview}
+                    {$preview |noAutoescape}
+                {/if}
+            </form>
+        {/param}
+    {/call}    
 {/template}

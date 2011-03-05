@@ -20,11 +20,26 @@
          :initform nil
          :accessor user-role)
    (password :initarg :password
-             :accessor user-password)
-   (info :initarg :info
-         :initarg nil
-         :accessor user-info))
+             :accessor user-password))
   (:metaclass persistent-class))
+
+(defun user-info-pathname (user)
+  (merge-pathnames (format nil
+                           "person/~A"
+                           (hunchentoot:url-encode (user-name user)))
+                   *datadir*))
+
+(defun user-info (user &aux (path (user-info-pathname user)))
+  (if (fad:file-exists-p path)
+      (alexandria:read-file-into-string path)
+      ""))
+
+(defun (setf user-info) (newvalue user)
+  (alexandria:write-string-into-file newvalue
+                                     (ensure-directories-exist
+                                      (user-info-pathname user))
+                                     :if-exists :supersede
+                                     :if-does-not-exist :create))
 
 (defclass invite (store-object)
   ((user :initarg :user

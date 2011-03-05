@@ -83,6 +83,43 @@
           :create-link (restas:genurl 'edit-article :title title)
           (user-info-links))))
 
+;; article-preview-page
+
+(defclass preview-article-page ()
+  ((title :initarg :title :reader article-title)
+   (content :initarg :content :reader preview-article-content)))
+
+(defmethod restas:render-object ((drawer drawer) (page preview-article-page))
+  (cliki2.view:edit-article
+   (list* :title (article-title page)
+          :content (preview-article-content page)
+          :preview (generate-html-from-markup (preview-article-content page))
+          (user-info-links))))
+
+;; article-history-page
+
+(defclass article-history-page ()
+  ((article :initarg :article :reader article)))
+
+(defmethod restas:render-object ((drawer drawer) (page article-history-page)
+                                 &aux
+                                 (article (article page))
+                                 (title (article-title article)))
+  (cliki2.view:view-article-history
+   (list* :title (format nil "History of page \"~A\"" title)
+          :history (iter (for revision in (article-revisions article))
+                         (collect
+                             (list :href (restas:genurl 'view-article-revision
+                                                        :title title
+                                                        :mark (revision-content-sha1 revision))
+                                   :author (let ((name (user-name (revision-author revision))))
+                                             (list :name name
+                                                   :href (restas:genurl 'view-person
+                                                                        :name name)))
+                                   :date (hunchentoot:rfc-1123-date (revision-date revision)))))
+          :links (article-action-list article :history)
+          (user-info-links))))
+
 ;; login
 
 (defmethod restas:render-object ((drawer drawer) (page (eql :sign-in-page)))
@@ -114,3 +151,38 @@
   (cliki2.view:confirm-registration
    (user-info-links)))
   
+;; person
+
+(defmethod restas:render-object ((drawer drawer) (person user)
+                                 &aux (name (user-name person)))
+  (cliki2.view:view-person
+     (list* :title name
+            :content (render-handle-markup drawer (user-info person))
+            :edit-link (if (string= name (user-name *user*))
+                             (restas:genurl 'edit-person :name name))
+            (user-info-links))))
+
+;; edit-person-page
+
+(defclass edit-person-page ()
+  ((person :initarg :person :reader person)))
+
+(defmethod restas:render-object ((drawer drawer) (page edit-person-page)
+                                 &aux (person (person page)))
+  (cliki2.view:edit-person
+   (list* :title (user-name person)
+          :content (user-info person)
+          (user-info-links))))
+
+;; preview-person-page
+
+(defclass preview-person-page ()
+  ((person :initarg :person :reader person)
+   (info :initarg :info :reader preview-person-info)))
+
+(defmethod restas:render-object ((drawer drawer) (page preview-person-page))
+  (cliki2.view:edit-person
+      (list* :title (user-name (person page))
+             :content (preview-person-info page)
+             :preview (generate-html-from-markup (preview-person-info page))
+             (user-info-links))))

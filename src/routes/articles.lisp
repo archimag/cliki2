@@ -53,11 +53,11 @@
 
 (restas:define-route preview-article ("edit/:title"
                                       :method :post
-                                      :render-method 'cliki2.view:edit-article
                                       :requirement (lambda () (check-edit-command "preview")))
-  (list :title title
-        :content (hunchentoot:post-parameter "content")
-        :preview (hunchentoot:post-parameter "content")))
+  (make-instance 'preview-article-page
+                 :title title
+                 :content (hunchentoot:post-parameter "content")))
+
 
 (restas:define-route cancel-edit-article ("edit/:title"
                                           :method :post
@@ -68,21 +68,11 @@
 
 
 
-(restas:define-route view-article-history ("history/:(title)"
-                                           :render-method 'cliki2.view:view-article-history)
+(restas:define-route view-article-history ("history/:(title)")
   (let ((article (article-with-title title)))
     (unless article
       (restas:abort-route-handler hunchentoot:+http-not-found+))
-
-    (list :title (format nil "History of page \"~A\"" title)
-          :history (iter (for revision in (article-revisions article))
-                         (collect
-                             (list :href (restas:genurl 'view-article-revision
-                                                         :title title
-                                                         :mark (revision-content-sha1 revision))
-                                    :author (user-name (revision-author revision))
-                                    :date (hunchentoot:rfc-1123-date (revision-date revision)))))
-          :links (article-action-list article :history))))
+    (make-instance 'article-history-page :article article)))
 
 (restas:define-route view-article-revision ("history/:title/:mark")
   (let ((article (article-with-title title)))

@@ -18,5 +18,6 @@
                         :components
                         ((:file "entry")
                          (:file "articles")
+                         (:file "person")
                          (:file "auth"))
                         :depends-on ("render" "sendmail"))))))
