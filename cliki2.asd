@@ -18,7 +18,8 @@
                (:module "routes"
                         :components
                         ((:file "entry")
-                         (:file "articles")
-                         (:file "person")
+                         (:file "check")
+                         (:file "articles" :depends-on ("check"))
+                         (:file "person" :depends-on ("check"))
                          (:file "auth"))
                         :depends-on ("view" "sendmail" "auth-core"))))))

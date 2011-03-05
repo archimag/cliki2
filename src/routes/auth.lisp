@@ -3,7 +3,7 @@
 (in-package #:cliki2)
 
 (restas:define-route sign-out ("specials/singout")
-  (run-sing-out)
+  (run-sign-out)
   (restas:redirect (hunchentoot:referer)))
 
 
@@ -113,22 +113,17 @@
 
 (restas:define-route confirm-registration ("specials/invite/:mark"
                                            :requirement 'not-sign-in-p)
-  (let ((invite (invite-with-mark mark)))
-    (unless invite
-      (restas:abort-route-handler hunchentoot:+http-not-found+))
-    :confirm-registration-page))
+  (check-intive mark)
+  :confirm-registration-page)
 
 (restas:define-route confirm-registration/post ("specials/invite/:mark"
                                                 :method :post
                                                 :requirement 'not-sign-in-p)
-  (let ((invite (invite-with-mark mark)))
-    (unless invite
-      (restas:abort-route-handler hunchentoot:+http-not-found+))
-    
+  (let ((invite (check-intive mark)))
     (with-transaction ()
       (setf (user-role (invite-user invite))
             nil)
       (delete-object invite))
-
+    
     (restas:redirect 'entry)))
    

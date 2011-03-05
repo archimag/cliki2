@@ -50,6 +50,20 @@
     </html>     
 {/template}
 
+{template forbidden}
+    {call base}
+        {param title: '403 Forbidden' /}
+        {param user: $user /}
+        {param body}
+            <h1>Forbidden</h1>
+
+            <p>
+                You don't have permission to access {$uri} on this server.
+            <p>
+        {/param}
+    {/call}
+{/template}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Article templates
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -186,6 +200,104 @@
     {/call}
 {/template}
 
+{template register-form}
+    <form method="post">
+        <table>
+            <tbody>
+                <tr>
+                    <td>Nickname:</td>
+                    <td>
+                        {if $badName}
+                            <div class="error-info">
+                                {switch $badName}
+                                    {case 'empty'} Login is empty
+                                        {case 'exist'} User with like nickname already exist
+                                        {/switch}
+                            </div>
+                        {/if}
+                        <input name="name" size="30" {if $name}value="{$name}"{/if} /> 
+                        <div class="info">Sample: graham, Piter.Norvig </div> 
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Email:</td>
+                    <td>
+                        {if $badEmail}
+                            <div class="error-info">
+                                {switch $badEmail}
+                                    {case 'empty'} email required
+                                        {case 'bad'} It does not seem as email
+                                            {case 'exist'} User with like email arleady exist
+                                            {/switch}
+                            </div>
+                        {/if}
+                        <input name="email" size="30" {if $email}value="{$email}"{/if}/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Password:</td>
+                    <td>
+                        {if $badPassword}
+                            <div class="error-info">
+                                {switch $badPassword}
+                                    {case 'empty'} Password required
+                                        {case 'short'} Too short password
+                                        {/switch}
+                            </div>
+                        {/if}
+                        <input name="password" type="password" size="30" {if $password}value="{$password}"{/if} />
+                        <div class="info">Minimum length - 8 characters</div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Repeat password:</td>
+                    <td>
+                        {if $badRePassword}
+                            <div class="error-info">
+                                Passwords do not match
+                            </div>
+                        {/if}
+                        <input name="re-password" type="password" size="30" {if $rePassword}value="{$rePassword}"{/if}/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br />
+
+        <div>
+            {if $badRecaptcha}
+                <div class="error-info">
+                    reCaptcha failed
+                </div>
+            {/if}
+
+            <script>
+                var RecaptchaOptions = {lb} theme : "{$theme ? $theme : 'clean'}", lang: "en" {rb};
+            </script>
+
+            <script type="text/javascript"
+                    src="http://api.recaptcha.net/challenge?k={$recaptchaPubkey}">
+            </script>
+
+            <noscript>
+                <iframe src="http://api.recaptcha.net/noscript?k={$recaptchaPubkey}"
+                        height="300" width="500" frameborder="0"></iframe><br />
+                <textarea name="recaptcha_challenge_field" rows="3" cols="40">
+                </textarea>
+                <input type="hidden" name="recaptcha_response_field" 
+                       value="manual_challenge" />
+            </noscript>
+        </div>
+
+        <br />
+        <input type="submit" value="Create account" />
+    </form>
+
+{/template}
 
 {template register}
     {call base}
@@ -195,101 +307,7 @@
             <div>
                 <h3>Create account</h3>
 
-                <form method="post">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>Nickname:</td>
-                                <td>
-                                    {if $badName}
-                                        <div class="error-info">
-                                            {switch $badName}
-                                                {case 'empty'} Login is empty
-                                                    {case 'exist'} User with like nickname already exist
-                                                    {/switch}
-                                        </div>
-                                    {/if}
-                                    <input name="name" size="30" {if $name}value="{$name}"{/if} /> 
-                                    <div class="info">Sample: graham, Piter.Norvig </div> 
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Email:</td>
-                                <td>
-                                    {if $badEmail}
-                                        <div class="error-info">
-                                            {switch $badEmail}
-                                                {case 'empty'} email required
-                                                    {case 'bad'} It does not seem as email
-                                                        {case 'exist'} User with like email arleady exist
-                                                        {/switch}
-                                        </div>
-                                    {/if}
-                                    <input name="email" size="30" {if $email}value="{$email}"{/if}/>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Password:</td>
-                                <td>
-                                    {if $badPassword}
-                                        <div class="error-info">
-                                            {switch $badPassword}
-                                                {case 'empty'} Password required
-                                                    {case 'short'} Too short password
-                                                    {/switch}
-                                        </div>
-                                    {/if}
-                                    <input name="password" type="password" size="30" {if $password}value="{$password}"{/if} />
-                                    <div class="info">Minimum length - 8 characters</div>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Repeat password:</td>
-                                <td>
-                                    {if $badRePassword}
-                                        <div class="error-info">
-                                            Passwords do not match
-                                        </div>
-                                    {/if}
-                                    <input name="re-password" type="password" size="30" {if $rePassword}value="{$rePassword}"{/if}/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <br />
-
-                    <div>
-                        {if $badRecaptcha}
-                            <div class="error-info">
-                                reCaptcha failed
-                            </div>
-                        {/if}
-
-                        <script>
-                            var RecaptchaOptions = {lb} theme : "{$theme ? $theme : 'clean'}", lang: "en" {rb};
-                        </script>
-
-                        <script type="text/javascript"
-                                src="http://api.recaptcha.net/challenge?k={$recaptchaPubkey}">
-                        </script>
-
-                        <noscript>
-                            <iframe src="http://api.recaptcha.net/noscript?k={$recaptchaPubkey}"
-                                    height="300" width="500" frameborder="0"></iframe><br />
-                            <textarea name="recaptcha_challenge_field" rows="3" cols="40">
-                            </textarea>
-                            <input type="hidden" name="recaptcha_response_field" 
-                                   value="manual_challenge" />
-                        </noscript>
-                    </div>
-
-                    <br />
-                    <input type="submit" value="Create account" />
-                </form>
+                {call register-form data="$data" /}
             </div>
         {/param}
     {/call}
@@ -396,3 +414,4 @@
         {/param}
     {/call}    
 {/template}
+

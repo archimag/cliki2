@@ -72,7 +72,7 @@
                    (user-password user)
                    :version version))
 
-(defun run-sing-out ()
+(defun run-sign-out ()
   "Clear cookie with auth information"
   (setf *user* nil)
   (hunchentoot:set-cookie *cookie-auth-name*

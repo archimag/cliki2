@@ -2,7 +2,6 @@
 
 (in-package #:cliki2)
 
-
 (restas:define-route entry ("")
   (view-article :title "index"))
 
