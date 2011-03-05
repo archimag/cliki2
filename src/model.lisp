@@ -5,16 +5,51 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; user
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+                                                                   
 (defclass user (store-object)
   ((name :initarg :name
          :index-type string-unique-index
          :index-reader user-with-name
          :index-values all-users
          :reader user-name)
-   (password :initarg :password :accessor user-password)
-   (info :initarg :info :initarg nil :accessor user-info))
+   (email :initarg :email
+          :index-type string-unique-index
+          :index-reader user-with-email
+          :reader user-email)
+   (role :initarg :role
+         :initform nil
+         :accessor user-role)
+   (password :initarg :password
+             :accessor user-password)
+   (info :initarg :info
+         :initarg nil
+         :accessor user-info))
   (:metaclass persistent-class))
+
+(defclass invite (store-object)
+  ((user :initarg :user
+         :reader invite-user)
+   (date :initarg :date
+         :initform (get-universal-time)
+         :reader invite-date)
+   (mark :reader invite-mark
+         :index-type string-unique-index
+         :index-reader invite-with-mark
+         :index-values all-invites))
+  (:metaclass persistent-class))
+
+(defmethod shared-initialize :after ((invite invite) slot-names &key
+                                     &aux (user (invite-user invite)))
+  (setf (slot-value invite 'mark)
+        (ironclad:byte-array-to-hex-string
+         (ironclad:digest-sequence :sha1
+                                   (babel:string-to-octets
+                                    (format nil
+                                            "~A~A~A"
+                                            (user-name user)
+                                            (user-email user)
+                                            (user-password user)))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; revision
@@ -24,16 +59,16 @@
   ((author :initarg :author
            :initform nil
            :reader revision-author)
-   (author-ip :initarg :author-ip :initform nil :reader revision-author-ip)
-   (date :initarg :date :initform (get-universal-time) :reader revision-date)
-   (content-sha1 :initarg :content :initform "" :reader revision-content-sha1))
+   (author-ip :initarg :author-ip
+              :initform nil
+              :reader revision-author-ip)
+   (date :initarg :date
+         :initform (get-universal-time)
+         :reader revision-date)
+   (content-sha1 :initarg :content
+                 :initform ""
+                 :reader revision-content-sha1))
   (:metaclass persistent-class))
-
-(defun calc-sha1-sum (val)
-  "Calc sha1 sum of the val (string)"
-  (ironclad:byte-array-to-hex-string
-   (ironclad:digest-sequence :sha1
-                             (babel:string-to-octets val :encoding :utf-8))))
 
 (defun content-path (sha1)
   (merge-pathnames (format nil "content/~A/~A" (subseq sha1 0 2) (subseq sha1 2))
@@ -68,7 +103,9 @@
           :index-type string-unique-index
           :index-reader article-with-title
           :index-values all-articles)
-   (revisions :initarg :charin :initform nil :accessor article-revisions))
+   (revisions :initarg :revisions
+              :initform nil
+              :accessor article-revisions))
   (:metaclass persistent-class))
 
 (defun article-last-revision (article)

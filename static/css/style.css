@@ -22,6 +22,7 @@ a.hyperspec { font-weight: bold; }
 
 a[href]:hover { background: #ff9 }
 
+/*
 table { border-collapse: collapse; border: 1px solid #aaa; }
 th 
 { 
@@ -31,6 +32,7 @@ th
   text-transform: lowercase 
 }
 th, td { padding: 0.2em 0.3em }
+*/
 
 ul li { list-style-type: square }
 
@@ -118,4 +120,83 @@ pre
 #footer a[href] { color: gold; text-decoration: none }
 #footer a[href]:hover { background: transparent; color: gold }
 
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * articles
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 .content { margin: 1em 0 1em 0; }
+
+.textarea { padding: 1em 0 1em 0;}
+.textarea textarea { width: 100%; }
+
+.top { color: #ccc }
+.top a:link, .top a:visited { color: #999 }
+
+.top li { display: inline; list-style-type: none; list-style-position: outside; list-style-image: none }
+
+#login { font-size: 80%; text-align: right; margin-bottom: 0.5em }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * user
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.info {color: gray; font-size: 80%;}
+
+.login-form {
+    padding: 2px;
+    font-size: 90%;
+    font-weight: normal;
+
+    /*border: 1px solid #D0D0D0;*/
+
+    display: table;
+}
+
+.login-form > table {
+    padding: 10px;
+}
+
+.login-form tr > td:first-child {
+
+    font-weight: bold;
+    vertical-align: top;
+    width: auto;
+}
+
+.login-form > table td {
+    padding-right: 5px;
+    padding-top: 3px;
+}
+
+.register-form {
+    border: 1px solid #d0d0d0;
+    display: table;
+
+    padding-top: 30px;
+    padding-bottom: 30px;
+    padding-left: 10px;
+    padding-right: 20px;
+}
+
+.register-form td {
+    padding-bottom: 20px;
+}
+
+.register-form tr > td:first-child {
+    vertical-align: top;
+    font-weight: bold;
+    font-size: 90%;
+    
+}
+
+
+
+.register-form input[type=button] {
+    margin-top: 10px;
+}
+
+.error-info {
+    color: red;
+    font-size: 80%;
+}

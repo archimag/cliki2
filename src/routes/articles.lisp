@@ -1,34 +1,11 @@
-;;;; routes.lisp
+;;;; articles.lisp
 
 (in-package #:cliki2)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; entry 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(restas:define-route entry ("")
-  (view-article :title "index"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; static
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(restas:mount-submodule -static- (#:restas.directory-publisher)
-  (restas.directory-publisher:*directory* (merge-pathnames "static/"
-                                                           *basepath*))
-  (restas.directory-publisher:*autoindex* t))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; article
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (restas:define-route view-article (":title")
   (or (article-with-title title)
-      (restas:abort-route-handler
-       (cliki2.view:article-not-found
-        (list :title title
-              :create-link (restas:genurl 'edit-article
-                                          :title title))))))
+      (make-instance 'article-not-found
+                     :title title)))
 
 (restas:define-route view-article-source ("raw/:title"
                                           :content-type "text/plain")
@@ -38,16 +15,30 @@
     (article-content article)))
 
 (restas:define-route edit-article ("edit/:title"
-                                   :render-method 'cliki2.view:edit-article)
-  (let ((article (article-with-title title)))
-    (list :title title
-          :content (if article
-                       (article-content article)
-                       ""))))
+                                   :requirement 'sign-in-p)
+  (make-instance 'edit-article-page
+                 :title title
+                 :article (article-with-title title)))
+
+(restas:define-route forbidden-edit-article ("edit/:title"
+                                             :requirement 'not-sign-in-p)
+  (declare (ignore title))
+  hunchentoot:+http-forbidden+)
+
+
+(restas:define-route forbidden-save-article ("edit/:title"
+                                             :method :post
+                                             :requirement 'not-sign-in-p)
+  (declare (ignore title))
+  hunchentoot:+http-forbidden+)
+
+(defun check-edit-command (field)
+  (and (sign-in-p)
+       (hunchentoot:post-parameter field)))
 
 (restas:define-route save-article ("edit/:title"
                                    :method :post
-                                   :requirement (lambda () (hunchentoot:post-parameter "save")))
+                                   :requirement (lambda () (check-edit-command "save")))
   (with-transaction ()
     (let ((article (or (article-with-title title)
                        (make-instance 'article :title title))))
@@ -63,14 +54,14 @@
 (restas:define-route preview-article ("edit/:title"
                                       :method :post
                                       :render-method 'cliki2.view:edit-article
-                                      :requirement (lambda () (hunchentoot:post-parameter "preview")))
+                                      :requirement (lambda () (check-edit-command "preview")))
   (list :title title
         :content (hunchentoot:post-parameter "content")
         :preview (hunchentoot:post-parameter "content")))
 
 (restas:define-route cancel-edit-article ("edit/:title"
                                           :method :post
-                                          :requirement (lambda () (hunchentoot:post-parameter "cancel")))
+                                          :requirement (lambda () (check-edit-command "cancel")))
   (restas:redirect 'view-article
                    :title title))
 
@@ -102,9 +93,3 @@
                                    :key #'revision-content-sha1
                                    :test #'string=)
                              :revision)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; person article
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
