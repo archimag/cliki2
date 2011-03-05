@@ -1,0 +1,121 @@
+// style.css
+
+body 
+{  
+  background: white;
+  color: black;
+  font-family: serif;
+  margin: 0; padding: 0.5em;
+}
+
+h1, h2, h3, h4 
+{ 
+  color: #999;
+  font-family: sans-serif;
+}
+h3 { font-weight: bold; font-size: 175%; }
+
+hr { border: 0; background: black; height: 1px }
+a.internal { color: #0077bb ; }
+a:visited.internal { color: #004488; } 
+a.hyperspec { font-weight: bold; }
+
+a[href]:hover { background: #ff9 }
+
+table { border-collapse: collapse; border: 1px solid #aaa; }
+th 
+{ 
+  font-family: sans-serif; 
+  background: royalblue;
+  color: white;
+  text-transform: lowercase 
+}
+th, td { padding: 0.2em 0.3em }
+
+ul li { list-style-type: square }
+
+pre
+{ 
+  background: #cdf; 
+  border: 1px solid #679; 
+  color: #235; 
+  font-size: 90%;
+  padding: 0.3em;
+}
+
+/*
+ * banner
+ */
+#banner
+{ 
+  background: steelblue;
+  border: 1px solid black;
+  color: white;
+  margin: 0;  padding: 0.5em 0.5em 1.5em; 
+}
+#banner a { color: white; font-weight: normal; text-decoration: none; padding: 0 }
+#banner a:hover { background: transparent; color: white }
+#banner a:hover.logo { text-decoration: none }
+#banner a.logo { font-family: serif; font-weight: bold; font-size: 250%; border-width: 0px }
+#banner a.logo .sub 
+{ 
+  color: gold;
+  font-size: 90%; 
+  position: relative; top: -0.3em; 
+}
+
+.search
+{ 
+  float: right; 
+  text-align: right;
+  padding:  1em 0 0;
+}
+.search input { border: 1px solid black }
+
+/* #navbar { margin: 1em 0 -0.5em 0 } */
+#navbar a 
+{ 
+  border: 1px solid gold;
+  border-width: 1px 0 1px 0;
+  font-size: 90%;
+  margin: 0 1em; padding: 0 0.2em 
+}
+#navbar a:hover
+{ 
+  border: 1px solid white;
+  border-width: 1px 0 1px 0;
+}
+
+.lastedit 
+{ 
+  color: gold;
+  float: right;
+  text-align: right; 
+  text-transform: lowercase;
+  margin: 0; padding: 0
+}
+
+/*
+ * content
+ */
+#content
+{ 
+  clear: both;
+  margin: 0; padding: 0 1.5em;
+}
+
+/*
+ * footer
+ */
+#footer
+{ 
+  background: steelblue;
+  color: white;
+  border: 1px solid black;
+  font-family: sans-serif;
+  margin-top: 0.5em; padding: 0.5em;
+}
+#footer a[href] { color: gold; text-decoration: none }
+#footer a[href]:hover { background: transparent; color: gold }
+
+.content { margin: 1em 0 1em 0; }
