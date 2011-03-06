@@ -36,14 +36,6 @@ th, td { padding: 0.2em 0.3em }
 
 ul li { list-style-type: square }
 
-pre
-{ 
-  background: #cdf; 
-  border: 1px solid #679; 
-  color: #235; 
-  font-size: 90%;
-  padding: 0.3em;
-}
 
 /*
  * banner

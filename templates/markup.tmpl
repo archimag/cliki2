@@ -1,0 +1,21 @@
+// -*- closure-template-html -*-
+
+{namespace cliki2.view}
+
+{template article-link}
+    <a href="{$href}">{$title}</a>
+{/template}
+
+{template person-link}
+    <a href="{$href}">{$name}</a>
+{/template}
+
+{template hyperspec-link}
+    <a href="{$href}">{$symbol}</a>
+{/template}
+
+{template code-block}
+    <div class="code">
+        {$code |noAutoescape}
+    </div>
+{/template}

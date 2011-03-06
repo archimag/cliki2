@@ -60,3 +60,15 @@
         {/param}
     {/call}
 {/template}
+
+{template internal-server-error}
+    {call base}
+        {param title: 500 Internal Server Error' /}
+        {param user: $user /}
+        {param body}
+            <h1>Internal Server Error</h1>
+
+            <p>An error has occured<p>
+        {/param}
+    {/call}
+{/template}

@@ -207,3 +207,7 @@
   (apply-template drawer
                   'cliki2.view:forbidden
                   :uri (hunchentoot:request-uri*)))
+
+(defmethod restas:render-object ((drawer drawer) (code (eql hunchentoot:+http-internal-server-error+)))
+  (apply-template drawer
+                  'cliki2.view:internal-server-error))

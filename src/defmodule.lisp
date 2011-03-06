@@ -74,7 +74,7 @@
                             *basepath*)))
     (closure-template:compile-template :common-lisp-backend
                                        (mapcar #'tmplpath
-                                               '("core" "article" "person" "auth")))))
+                                               '("core" "article" "person" "auth" "markup")))))
 
 (compile-all-templates)
 
