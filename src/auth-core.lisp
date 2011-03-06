@@ -91,7 +91,9 @@
         (let ((user (user-with-name name)))
           (if (and user
                    (string= (user-password user)
-                            password))
+                            password)
+                   (or (null (user-role user))
+                       (member (user-role user) '(:moderator :administrator))))
               user)))))
         
 (defmethod routes:route-check-conditions ((route check-auth-user-route) bindings)

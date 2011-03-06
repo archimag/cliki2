@@ -5,8 +5,7 @@
 (restas:define-route view-person ("person/:name")
   (check-person name))
     
-(restas:define-route edit-person ("person/edit/:name"
-                                  :requirement 'sign-in-p)
+(restas:define-route edit-person ("person/edit/:name")
   (make-instance 'edit-person-page
                  :person (check-owner-person name)))
 
@@ -21,10 +20,9 @@
 (restas:define-route preview-person ("person/edit/:name"
                                      :method :post
                                      :requirement (check-edit-command "preview"))
-  (let ((person (check-owner-person name)))
-    (make-instance 'preview-person-page
-                   :person person
-                   :info (hunchentoot:post-parameter "content"))))
+  (make-instance 'preview-person-page
+                 :person (check-owner-person name)
+                 :info (hunchentoot:post-parameter "content")))
 
 (restas:define-route cancel-edit-person ("person/edit/:name"
                                           :method :post

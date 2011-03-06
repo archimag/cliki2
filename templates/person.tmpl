@@ -1,0 +1,51 @@
+// -*- closure-template-html -*-
+
+{namespace cliki2.view}
+
+{template view-person}
+    {call base}
+        {param title: $title /}
+        {param user: $user /}
+        {param body}
+            <div class="content">
+                {$content |noAutoescape}
+            </div>
+
+            {if $editLink}
+                <div id="footer">
+                    <a href="{$editLink}">Edit</a>
+                </div>
+            {/if}
+        {/param}
+    {/call}
+{/template}
+
+
+{template edit-person}
+    {call base}
+        {param title: 'Edit ' + $title /}
+        {param user: $user /}
+        {param body}
+            <form method="post">
+                <form  method="post">
+                    <div class="textarea">
+                        <textarea rows="30" cols="80" name="content">
+                            {nil}{$content}{nil}
+                        </textarea>
+                    </div>
+                    
+                    <div class="edit-buttons">
+                        <input type="submit" value="Save" name="save" />
+                        <input type="submit" value="Preview" name="preview" />
+                        <input type="submit" value="Cancel" name="cancel" />
+                    </div>
+                </form>
+
+                {if $preview}
+                    {$preview |noAutoescape}
+                {/if}
+            </form>
+        {/param}
+    {/call}    
+{/template}
+

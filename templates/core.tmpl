@@ -1,0 +1,61 @@
+// -*- closure-template-html -*-
+
+{namespace cliki2.view}
+
+{template base}
+    <html>
+        <head>
+            <title>{$title}</title>
+            
+            <link  rel="stylesheet" href="/css/style.css">
+        </head>
+        
+        <body>
+            <div class="top">
+                {if $user.name}
+                    <div id="login">
+                        <a href="{$user.href}">{$user.name}</a> | 
+                        <a href="{$user.signOut}" id="logout">Sign Out</a>
+                    </div>
+                {else}
+                    <div id="login">
+                        <a href="{$user.register}">Register</a> |
+                        <a href="{$user.signIn}{if $callback}?done={$callback}{/if}">Sign In</a>
+                    </div>
+                {/if}
+            </div>
+
+            <div id="banner">
+                <a title="cliki home atricle" class="logo" href="http://www.cliki.net/">
+                    CL<span class="sub">iki</span> 
+                </a> 
+                the common lisp wiki
+                <br />
+                
+                <div id="navbar">
+                    <a href="/">home</a> 
+                    <a href="changes">recent changes</a> 
+                    <a href="about">about cliki</a> 
+                    <a href="raw">text formatting</a> 
+                    <a>create new article</a> 
+                </div> 
+            </div> 
+
+            {$body |noAutoescape}
+        </body> 
+    </html>     
+{/template}
+
+{template forbidden}
+    {call base}
+        {param title: '403 Forbidden' /}
+        {param user: $user /}
+        {param body}
+            <h1>Forbidden</h1>
+
+            <p>
+                You don't have permission to access {$uri} on this server.
+            <p>
+        {/param}
+    {/call}
+{/template}

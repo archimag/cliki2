@@ -68,8 +68,12 @@
 ;;;; compile templates
 
 (defun compile-all-templates ()
-  (closure-template:compile-template :common-lisp-backend
-                                     (merge-pathnames "templates/cliki2.tmpl" *basepath*)))
+  (flet ((tmplpath (name)
+           (merge-pathnames (format nil "templates/~A.tmpl" name)
+                            *basepath*)))
+    (closure-template:compile-template :common-lisp-backend
+                                       (mapcar #'tmplpath
+                                               '("core" "article" "person" "auth")))))
 
 (compile-all-templates)
 

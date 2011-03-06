@@ -1,0 +1,96 @@
+// -*- closure-template-html -*-
+
+{namespace cliki2.view}
+
+{template article-not-found}
+    {call base}
+        {param title: $title /}
+        {param user: $user /}
+        {param body}
+            <h1>Cliki2 does not have an article with this exact name</h1>
+            <a href="{$createLink}">Create</a>
+        {/param}
+    {/call}
+{/template}
+
+{template article-action-links}
+    <div id="footer">
+        {if $view}
+            <a href="{$view}">View</a>
+        {/if}
+        
+        {if $edit}
+            <a href="{$edit}">Edit</a> |
+        {/if}
+
+        {if $raw}
+            <a href="{$raw}">Source</a> |
+        {/if}
+
+        {if $history}
+            <a href="{$history}">History</a>
+        {/if}
+    </div> 
+{/template}
+
+{template view-article}
+    {call base}
+        {param title: $title /}
+        {param user: $user /}
+        {param body}
+            <div class="content">
+                {$content |noAutoescape}
+            </div>
+
+            {call article-action-links data="$links" /}
+        {/param}
+    {/call}
+{/template}
+
+{template edit-article}
+    {call base}
+        {param title: 'Edit ' + $title /}
+        {param user: $user /}
+        {param body}
+            <form method="post">
+                <form  method="post">
+                    <div class="textarea">
+                        <textarea rows="30" cols="80" name="content">
+                            {nil}{$content}{nil}
+                        </textarea>
+                    </div>
+                    
+                    <div class="edit-buttons">
+                        <input type="submit" value="Save" name="save" />
+                        <input type="submit" value="Preview" name="preview" />
+                        <input type="submit" value="Cancel" name="cancel" />
+                    </div>
+                </form>
+
+                {if $preview}
+                    {$preview |noAutoescape}
+                {/if}
+            </form>
+        {/param}
+    {/call}    
+{/template}
+
+{template view-article-history}
+    {call base}
+        {param title: 'History of article: ' + $title /}
+        {param user: $user /}
+        {param body}
+            <ul>
+                {foreach $revision in $history}
+                    <li>
+                        <a href="{$revision.href}">{$revision.date}</a>
+                        <a href="{$revision.author.href}">{$revision.author.name}</a>
+                    </li>
+                {/foreach}
+            </ul>
+
+            {call article-action-links data="$links" /}
+        {/param}
+    {/call}
+{/template}
+
