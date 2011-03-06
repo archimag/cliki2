@@ -24,7 +24,7 @@
       (t (restas:redirect 'sign-in)))))
        
 (restas:define-route register ("specials/register")
-  (make-instance 'register-page))
+  (list :register-page :data nil))
 
 (defun form-field-value (field)
   (hunchentoot:post-parameter field))
@@ -87,12 +87,12 @@
         (password (form-field-value "password")))
     (cond
       (fails
-       (make-instance 'register-page
-                      :data (list* :name nickname
-                                   :email email
-                                   :password password
-                                   :re-password (form-field-value "re-password")
-                                   fails)))
+       (list :register-page
+             :data (list* :name nickname
+                          :email email
+                          :password password
+                          :re-password (form-field-value "re-password")
+                          fails)))
       (t (let ((invite (with-transaction ()
                          (make-instance 'invite
                                         :user (make-instance 'user

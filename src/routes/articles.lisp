@@ -4,8 +4,8 @@
 
 (restas:define-route view-article (":title")
   (or (article-with-title title)
-      (make-instance 'article-not-found
-                     :title title)))
+      (list :article-not-found-page
+            :title title)))
 
 (restas:define-route view-article-source ("raw/:title"
                                           :content-type "text/plain")
@@ -13,9 +13,9 @@
 
 (restas:define-route edit-article ("edit/:title")
   (check-article-edit-access)
-  (make-instance 'edit-article-page
-                 :title title
-                 :article (article-with-title title)))
+  (list :edit-article-page
+        :title title
+        :article (article-with-title title)))
 
 (restas:define-route save-article ("edit/:title"
                                    :method :post
@@ -36,9 +36,9 @@
                                       :method :post
                                       :requirement (check-edit-command "preview"))
   (check-article-edit-access)
-  (make-instance 'preview-article-page
-                 :title title
-                 :content (hunchentoot:post-parameter "content")))
+  (list :preview-article-page
+        :title title
+        :content (hunchentoot:post-parameter "content")))
 
 
 (restas:define-route cancel-edit-article ("edit/:title"
@@ -49,15 +49,15 @@
                    :title title))
 
 (restas:define-route view-article-history ("history/:(title)")
-  (make-instance 'article-history-page
-                 :article (check-article title)))
+  (list :article-history-page
+        :article (check-article title)))
 
 (restas:define-route view-article-revision ("history/:title/:mark")
   (let ((article (check-article title)))
-    (make-instance 'article-revision-page
-                   :article article
-                   :revision (find mark
-                                   (article-revisions article)
-                                   :key #'revision-content-sha1
-                                   :test #'string=))))
+    (list :article-revision-page
+          :article article
+          :revision (find mark
+                          (article-revisions article)
+                          :key #'revision-content-sha1
+                          :test #'string=))))
 

@@ -8,6 +8,8 @@
 
 (defgeneric apply-template (drawer template &rest args &key &allow-other-keys))
 
+(defgeneric render-key-data (drawer pagetype &rest args &key &allow-other-keys))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; drawer
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -52,6 +54,14 @@
                     :content (render-handle-markup drawer (revision-content revision))
                     :links (article-action-list article mode))))
 
+;; key data
+
+(defmethod restas:render-object ((drawer drawer) (data list))
+  (apply 'render-key-data
+         drawer
+         (car data)
+         (cdr data)))
+
 ;; article
 
 (defmethod restas:render-object ((drawer drawer) (article article))
@@ -59,27 +69,18 @@
 
 ;; edit-article-page
 
-(defclass edit-article-page ()
-  ((title :initarg :title :reader article-title)
-   (article :initarg :article :reader article)))
-
-(defmethod restas:render-object ((drawer drawer) (page edit-article-page))
-  (let* ((title (article-title page))
-         (article (article page)))
-    (apply-template drawer
-                    'cliki2.view:edit-article
-                    :title title
-                    :content (if article
-                                 (article-content article)
-                                 ""))))
+(defmethod render-key-data ((drawer drawer) (type (eql :edit-article-page))
+                            &key title article)
+  (apply-template drawer
+                  'cliki2.view:edit-article
+                  :title title
+                  :content (if article
+                               (article-content article)
+                               "")))
 
 ;; article-not-found
 
-(defclass article-not-found ()
-  ((title :initarg :title :reader article-title)))
-
-(defmethod restas:render-object ((drawer drawer) (article article-not-found)
-                                 &aux (title (article-title article)))
+(defmethod render-key-data ((drawer drawer) (type (eql :article-not-found-page)) &key title)
   (apply-template drawer
                   'cliki2.view:article-not-found
                   :title title
@@ -87,26 +88,18 @@
 
 ;; article-preview-page
 
-(defclass preview-article-page ()
-  ((title :initarg :title :reader article-title)
-   (content :initarg :content :reader preview-article-content)))
-
-(defmethod restas:render-object ((drawer drawer) (page preview-article-page))
+(defmethod render-key-data ((drawer drawer) (type (eql :preview-article-page))
+                            &key title content)
   (apply-template drawer
                   'cliki2.view:edit-article
-                  :title (article-title page)
-                  :content (preview-article-content page)
-                  :preview (generate-html-from-markup (preview-article-content page))))
+                  :title title
+                  :content content
+                  :preview (generate-html-from-markup content)))
 
 ;; article-history-page
 
-(defclass article-history-page ()
-  ((article :initarg :article :reader article)))
-
-(defmethod restas:render-object ((drawer drawer) (page article-history-page)
-                                 &aux
-                                 (article (article page))
-                                 (title (article-title article)))
+(defmethod render-key-data ((drawer drawer) (type (eql :article-history-page))
+                            &key article &aux (title (article-title article)))
   (apply-template drawer
                   'cliki2.view:view-article-history
                   :title (format nil "History of page \"~A\"" title)
@@ -124,15 +117,9 @@
 
 ;; article-revision-page
 
-(defclass article-revision-page ()
-  ((article :initarg :article :reader article)
-   (revision :initarg :revision :reader revision)))
-
-(defmethod restas:render-object ((drawer drawer) (page article-revision-page))
-  (render-article-revision drawer
-                           (article page)
-                           (revision page)
-                           :revision))
+(defmethod render-key-data ((drawer drawer) (type (eql :article-revision-page))
+                            &key article revision)
+  (render-article-revision drawer article revision :revision))
 
 ;; login
 
@@ -143,14 +130,12 @@
 
 ;; register
 
-(defclass register-page ()
-  ((data :initarg :data :initform nil :reader register-data)))
-
-(defmethod restas:render-object ((drawer drawer) (page register-page))
+(defmethod render-key-data ((drawer drawer) (type (eql :register-page))
+                            &key data)
   (apply-template drawer
                   'cliki2.view:register
                   :data (list* :recaptcha-pubkey *recaptcha.publick-key*
-                               (register-data page))))
+                               data)))
 
 ;; register-sendmail-page
 
@@ -178,11 +163,8 @@
 
 ;; edit-person-page
 
-(defclass edit-person-page ()
-  ((person :initarg :person :reader person)))
-
-(defmethod restas:render-object ((drawer drawer) (page edit-person-page)
-                                 &aux (person (person page)))
+(defmethod render-key-data ((drawer drawer) (type (eql :edit-person-page))
+                            &key person)
   (apply-template drawer  
                   'cliki2.view:edit-person
                   :title (user-name person)
@@ -190,16 +172,13 @@
 
 ;; preview-person-page
 
-(defclass preview-person-page ()
-  ((person :initarg :person :reader person)
-   (info :initarg :info :reader preview-person-info)))
-
-(defmethod restas:render-object ((drawer drawer) (page preview-person-page))
+(defmethod render-key-data ((drawer drawer) (type (eql :preview-person-page))
+                            &key person info)
   (apply-template drawer  
                   'cliki2.view:edit-person
-                  :title (user-name (person page))
-                  :content (preview-person-info page)
-                  :preview (generate-html-from-markup (preview-person-info page))))
+                  :title (user-name person)
+                  :content info
+                  :preview (generate-html-from-markup info)))
 
 ;; forbidden
 
@@ -207,6 +186,8 @@
   (apply-template drawer
                   'cliki2.view:forbidden
                   :uri (hunchentoot:request-uri*)))
+
+;; internal server error
 
 (defmethod restas:render-object ((drawer drawer) (code (eql hunchentoot:+http-internal-server-error+)))
   (apply-template drawer
