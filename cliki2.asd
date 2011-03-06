@@ -5,6 +5,7 @@
                  #:bknr.datastore
                  #:ironclad
                  #:docutils
+                 #:colorize
                  #:cl-recaptcha)
     :components
     ((:module "src"
