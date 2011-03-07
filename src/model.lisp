@@ -128,14 +128,21 @@
 
 (defclass article (store-object)
   ((title :initarg :title
-          :reader article-title
-          :index-type string-unique-index
-          :index-reader article-with-title
-          :index-values all-articles)
+          :reader article-title)
+   (downcase-title :index-type string-unique-index
+                   :index-reader article-with-downcase-title
+                   :index-values all-articles)
    (revisions :initarg :revisions
               :initform nil
               :accessor article-revisions))
   (:metaclass persistent-class))
+
+(defmethod shared-initialize :after ((article article) slot-names &key &allow-other-keys)
+  (setf (slot-value article 'downcase-title)
+        (string-downcase (article-title article))))
+
+(defun article-with-title (title)
+  (article-with-downcase-title (string-downcase title)))
 
 (defun article-last-revision (article)
   (car (article-revisions article)))

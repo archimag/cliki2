@@ -84,7 +84,7 @@
   (apply-template drawer
                   'cliki2.view:article-not-found
                   :title title
-                  :create-link (restas:genurl 'edit-article :title title)))
+                  :create-link (if *user* (restas:genurl 'edit-article :title title))))
 
 ;; article-preview-page
 

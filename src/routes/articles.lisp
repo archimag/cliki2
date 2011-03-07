@@ -3,7 +3,12 @@
 (in-package #:cliki2)
 
 (restas:define-route view-article (":title")
-  (or (article-with-title title)
+  (or (let ((article (article-with-title title)))
+        (when (and article
+                   (not (string= (article-title article) title)))
+          (restas:redirect 'view-article
+                           :title (article-title article)))
+        article)
       (list :article-not-found-page
             :title title)))
 

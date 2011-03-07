@@ -8,7 +8,9 @@
         {param user: $user /}
         {param body}
             <h1>Cliki2 does not have an article with this exact name</h1>
-            <a href="{$createLink}">Create</a>
+            {if $createLink}
+                <a href="{$createLink}">Create</a>
+            {/if}
         {/param}
     {/call}
 {/template}
