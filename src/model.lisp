@@ -3,6 +3,21 @@
 (in-package #:cliki2)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; cliki2 storage
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass cliki2-store (mp-store)
+  ((recent-changes :initform nil :accessor cliki2-recent-changes)))
+
+(defmethod bknr.datastore::restore-store :before ((store cliki2-store) &key until)
+  (declare (ignore until))
+  (setf (cliki2-recent-changes store) nil))
+
+(deftransaction add-change (object user date comment)
+  (push (list object user date comment)
+        (cliki2-recent-changes *store*)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; user
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                                                                    
@@ -65,7 +80,6 @@
                                             (user-email user)
                                             (user-password user)))))))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; revision
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,7 +94,7 @@
    (date :initarg :date
          :initform (get-universal-time)
          :reader revision-date)
-   (content-sha1 :initarg :content
+   (content-sha1 :initarg :content-sha1
                  :initform ""
                  :reader revision-content-sha1))
   (:metaclass persistent-class))
@@ -99,10 +113,10 @@
       (alexandria:write-byte-vector-into-file octets path))
     sha1))
 
-(defmethod shared-initialize :after ((revision revision) slot-names &key content &allow-other-keys)
-  (when content
-    (setf (slot-value revision 'content-sha1)
-          (save-content content))))
+;; (defmethod shared-initialize :after ((revision revision) slot-names &key content &allow-other-keys)
+;;   (when content
+;;     (setf (slot-value revision 'content-sha1)
+;;           (save-content content))))
 
 (defun revision-content (revision)
   (alexandria:read-file-into-string
@@ -128,3 +142,4 @@
    
 (defun article-content (article)
   (revision-content (article-last-revision article)))
+

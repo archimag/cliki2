@@ -15,6 +15,11 @@
   (let ((person (check-owner-person name)))
     (setf (user-info person)
           (hunchentoot:post-parameter "content"))
+    (unless (hunchentoot:post-parameter "minoredit")
+      (add-change person
+                  *user*
+                  (get-universal-time)
+                  (hunchentoot:post-parameter "summary")))
     (restas:redirect 'view-person :name name)))
 
 (restas:define-route preview-person ("person/edit/:name"

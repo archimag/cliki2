@@ -180,6 +180,14 @@
                   :content info
                   :preview (generate-html-from-markup info)))
 
+;; recent-changes-page
+
+(defmethod render-key-data ((drawer drawer) (type (eql :recent-changes-page))
+                            &key changes)
+  (apply-template drawer
+                  'cliki2.view:recent-changes
+                  :changes changes))
+                                                 
 ;; forbidden
 
 (defmethod restas:render-object ((drawer drawer) (code (eql hunchentoot:+http-forbidden+)))
@@ -192,3 +200,4 @@
 (defmethod restas:render-object ((drawer drawer) (code (eql hunchentoot:+http-internal-server-error+)))
   (apply-template drawer
                   'cliki2.view:internal-server-error))
+

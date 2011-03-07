@@ -63,12 +63,34 @@
 
 {template internal-server-error}
     {call base}
-        {param title: 500 Internal Server Error' /}
+        {param title: '500 Internal Server Error' /}
         {param user: $user /}
         {param body}
             <h1>Internal Server Error</h1>
 
             <p>An error has occured<p>
+        {/param}
+    {/call}
+{/template}
+
+
+{template recent-changes}
+    {call base}
+        {param title: 'Recent Changes' /}
+        {param user: $user /}
+        {param body}
+            <h1>Recent Changes</h1>
+
+            <ul>
+                {foreach $item in $changes}
+                    <li>
+                        {$item.date} 
+                        <a href="{$item.href}">{$item.title}</a> 
+                        <a href="{$item.user.href}">{$item.user.name}</a>
+                        {$item.comment}
+                    </li>
+                {/foreach}
+            </ul>
         {/param}
     {/call}
 {/template}

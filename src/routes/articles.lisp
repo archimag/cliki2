@@ -21,14 +21,21 @@
                                    :method :post
                                    :requirement (check-edit-command "save"))
   (check-article-edit-access)
-  (with-transaction ()
-    (let ((article (or (article-with-title title)
+  (let ((article (or (article-with-title title)
+                     (with-transaction ()
                        (make-instance 'article :title title))))
+        (content-sha1 (save-content (hunchentoot:post-parameter "content"))))
+    (with-transaction ()
       (push (make-instance 'revision
-                           :content (hunchentoot:post-parameter "content")
+                           :content-sha1 content-sha1
                            :author *user*
                            :author-ip (hunchentoot:real-remote-addr))
             (article-revisions article))))
+  (unless (hunchentoot:post-parameter "minoredit")
+    (add-change (article-with-title title)
+                *user*
+                (get-universal-time)
+                (hunchentoot:post-parameter "summary")))
   (restas:redirect 'view-article
                    :title title))
 

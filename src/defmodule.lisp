@@ -62,7 +62,8 @@
 
     (let ((*store* nil))
 
-      (open-store (merge-pathnames "store/" *datadir*))
+      (open-store (merge-pathnames "store/" *datadir*)
+                  :class-name 'cliki2-store)
       (setf (restas:context-symbol-value context '*store*)
             *store*))))
 
