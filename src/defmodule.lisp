@@ -2,7 +2,7 @@
 
 (restas:define-module #:cliki2
   (:use #:cl #:iter #:bknr.datastore #:bknr.indices)
-  (:import-from #:docutils.parser.rst #:&option #:&content #:&content-parser))
+  (:import-from #:docutils.parser.rst #:&option #:&content #:&content-parser #:&allow-spaces))
 
 (in-package #:cliki2)
 

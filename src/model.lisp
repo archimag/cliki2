@@ -134,7 +134,12 @@
                    :index-values all-articles)
    (revisions :initarg :revisions
               :initform nil
-              :accessor article-revisions))
+              :accessor article-revisions)
+   (category-list :initarg :category-list
+                  :initform nil
+                  :accessor article-category-list
+                  :index-type hash-list-index
+                  :index-reader articles-with-category))
   (:metaclass persistent-class))
 
 (defmethod shared-initialize :after ((article article) slot-names &key &allow-other-keys)

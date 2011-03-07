@@ -19,3 +19,17 @@
         {$code |noAutoescape}
     </div>
 {/template}
+
+{template category-link}
+    <a href="{$href}">{$title}</a>
+{/template}
+
+{template category-content}
+    <ul>
+        {foreach $item in $items}
+            <li>
+                <a href="{$item.href}">{$item.title}</a>
+            </li>
+        {/foreach}
+    </ul>
+{/template}

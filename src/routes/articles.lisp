@@ -26,16 +26,20 @@
                                    :method :post
                                    :requirement (check-edit-command "save"))
   (check-article-edit-access)
-  (let ((article (or (article-with-title title)
-                     (with-transaction ()
-                       (make-instance 'article :title title))))
-        (content-sha1 (save-content (hunchentoot:post-parameter "content"))))
+  (let* ((article (or (article-with-title title)
+                      (with-transaction ()
+                        (make-instance 'article :title title))))
+         (content (hunchentoot:post-parameter "content"))
+         (categories (content-categories content))
+         (content-sha1 (save-content content)))
     (with-transaction ()
       (push (make-instance 'revision
                            :content-sha1 content-sha1
                            :author *user*
                            :author-ip (hunchentoot:real-remote-addr))
-            (article-revisions article))))
+            (article-revisions article))
+      (setf (article-category-list article)
+            categories)))
   (unless (hunchentoot:post-parameter "minoredit")
     (add-change (article-with-title title)
                 *user*
