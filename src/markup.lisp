@@ -120,7 +120,7 @@
     (make-instance 'category-ref
                    :title title)))
 
-(defun string-to-keyword (str)
+(defun category-keyword (str)
   (intern (ppcre:regex-replace-all "(\\s)+" (string-upcase str) "-")
           :keyword))
 
@@ -131,7 +131,7 @@
       (docutils:with-nodes (node doc)
         (typecase node
           (category-ref
-           (push (string-to-keyword (category-ref-title node))
+           (push (category-keyword (category-ref-title node))
                  categories))))
       categories)))
 
@@ -151,6 +151,6 @@
     (let ((node (docutils:make-node 'docutils.nodes:paragraph)))
       (docutils:add-child node
                           (make-instance 'category-content
-                                         :title (string-to-keyword title)))
+                                         :title (category-keyword title)))
       (docutils:add-child parent node))))
     
