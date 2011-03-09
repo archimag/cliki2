@@ -107,7 +107,7 @@
                             :noreply-mail *noreply-email*
                             :subject (prepare-subject "Потверждение регистрации")
                             :host (hunchentoot:host)
-                            :link (restas:gen-full-url 'accept-invitation
+                            :link (restas:gen-full-url 'confirm-registration
                                                        :mark (invite-mark invite)))))
            :register-sendmail-page)))))
 
