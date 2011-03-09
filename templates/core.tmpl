@@ -6,6 +6,8 @@
     <html>
         <head>
             <title>{$title}</title>
+
+            <link  rel="alternate" type="application/rss+xml" title="recent changes" href="/feed/rss.xml">
             
             <link  rel="stylesheet" href="/css/style.css">
             <link  rel="stylesheet" href="/css/colorize.css">
@@ -93,4 +95,25 @@
             </ul>
         {/param}
     {/call}
+{/template}
+
+
+{template rss-feed}
+   {nil}<?xml version="1.0" encoding="utf-8"?>{\n}
+    <rss version="2.0">
+        <channel>
+            <title>{$title}</title>
+            <link>{$link}</link>
+            <description>{$description}</description>
+
+            {foreach $item in $changes}
+                <item>
+                    <title>{$item.user.name}: {$item.title}</title>
+                    <link>{$item.href}</link>
+                    <description>{$item.comment}</description>
+                    <pubDate>{$item.date}</pubDate>
+                </item>
+            {/foreach}
+        </channel>
+    </rss>
 {/template}

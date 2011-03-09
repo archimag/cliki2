@@ -23,3 +23,12 @@
                                                 :name (user-name user))
                                     :comment comment
                                     (object-link-info object)))))))
+
+
+(restas:define-route recent-changes-feed ("feed/rss.xml"
+                                          :content-type "application/rss+xml"
+                                          :render-method 'cliki2.view:rss-feed)
+  (list* :title "CLiki Recent Changes"
+        :link (restas:gen-full-url 'recent-changes-feed)
+        (cdr (recent-changes))))
+  
