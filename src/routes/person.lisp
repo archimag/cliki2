@@ -9,17 +9,11 @@
   (list :edit-person-page
         :person (check-owner-person name)))
 
-(restas:define-route save-person ("person/edit/:name"
+(restas:define-route save-person ("person/edit/:name" ;; persons need to be cliki pages!!!
                                   :method :post
                                   :requirement (check-edit-command "save"))
   (let ((person (check-owner-person name)))
-    (setf (user-info person)
-          (hunchentoot:post-parameter "content"))
-    (unless (hunchentoot:post-parameter "minoredit")
-      (add-change person
-                  *user*
-                  (get-universal-time)
-                  (hunchentoot:post-parameter "summary")))
+    (setf (user-info person) (hunchentoot:post-parameter "content"))
     (restas:redirect 'view-person :name name)))
 
 (restas:define-route preview-person ("person/edit/:name"

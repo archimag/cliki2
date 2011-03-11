@@ -3,24 +3,9 @@
 (in-package #:cliki2)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; cliki2 storage
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass cliki2-store (mp-store)
-  ((recent-changes :initform nil :accessor cliki2-recent-changes)))
-
-(defmethod bknr.datastore::restore-store :before ((store cliki2-store) &key until)
-  (declare (ignore until))
-  (setf (cliki2-recent-changes store) nil))
-
-(deftransaction add-change (object user date comment)
-  (push (list object user date comment)
-        (cliki2-recent-changes *store*)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; user
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                                                                   
+
 (defclass user (store-object)
   ((name :initarg :name
          :index-type string-unique-index
@@ -34,8 +19,10 @@
    (role :initarg :role
          :initform nil
          :accessor user-role)
+   (salt :initform nil
+         :accessor user-password-salt) ;; FIXME
    (password :initarg :password
-             :accessor user-password))
+             :accessor user-password)) ;; hash this PROPERLY
   (:metaclass persistent-class))
 
 (defun user-info-pathname (user)
@@ -81,48 +68,6 @@
                                             (user-password user)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; revision
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass revision (store-object)
-  ((author :initarg :author
-           :initform nil
-           :reader revision-author)
-   (author-ip :initarg :author-ip
-              :initform nil
-              :reader revision-author-ip)
-   (date :initarg :date
-         :initform (get-universal-time)
-         :reader revision-date)
-   (content-sha1 :initarg :content-sha1
-                 :initform ""
-                 :reader revision-content-sha1))
-  (:metaclass persistent-class))
-
-(defun content-path (sha1)
-  (merge-pathnames (format nil "content/~A/~A" (subseq sha1 0 2) (subseq sha1 2))
-                   *datadir*))
-
-(defun save-content (content)
-  (let* ((octets (babel:string-to-octets content :encoding :utf-8))
-         (sha1 (ironclad:byte-array-to-hex-string
-                (ironclad:digest-sequence :sha1 octets)))
-         (path (content-path sha1)))
-    (unless (fad:file-exists-p path)
-      (ensure-directories-exist path)
-      (alexandria:write-byte-vector-into-file octets path))
-    sha1))
-
-;; (defmethod shared-initialize :after ((revision revision) slot-names &key content &allow-other-keys)
-;;   (when content
-;;     (setf (slot-value revision 'content-sha1)
-;;           (save-content content))))
-
-(defun revision-content (revision)
-  (alexandria:read-file-into-string
-   (content-path (revision-content-sha1 revision))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; article
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -149,9 +94,95 @@
 (defun article-with-title (title)
   (article-with-downcase-title (string-downcase title)))
 
-(defun article-last-revision (article)
+(defun article-latest-revision (article)
   (car (article-revisions article)))
-   
-(defun article-content (article)
-  (revision-content (article-last-revision article)))
 
+(defvar *latest-revision-cache* (make-hash-table))
+(defvar *latest-revision-cache-lock* (bt:make-lock))
+
+(defun article-content (article)
+  (let ((latest-revision (article-latest-revision article))
+        (cache (bt:with-lock-held (*latest-revision-cache-lock*)
+                 (gethash article *latest-revision-cache*))))
+    (if (eq (car cache) latest-revision)
+        (cdr cache)
+        (let ((content (revision-content (article-latest-revision article))))
+          (bt:with-lock-held (*latest-revision-cache-lock*)
+            (setf (gethash article *latest-revision-cache*)
+                  (cons latest-revision content)))
+          content))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; revision
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass revision (store-object)
+  ((article      :initarg   :article
+                 :reader    revision-article)
+   (author       :initarg   :author
+                 :reader    revision-author)
+   (author-ip    :initarg   :author-ip
+                 :reader    revision-author-ip)
+   (date         :initarg   :date
+                 :reader    revision-date)
+   (summary      :initarg   :summary
+                 :reader    revision-summary)
+   (content-sha1 :initarg   :content-sha1
+                 :reader    revision-content-sha1))
+  (:metaclass persistent-class))
+
+(defun content-path (article content-sha1)
+  (merge-pathnames
+   (format nil "content/~A/~A"
+           (remove-if-not #'alphanumericp (article-title article))
+           content-sha1)
+   *datadir*))
+
+(defun save-content (article content)
+  (let* ((octets (babel:string-to-octets content :encoding :utf-8))
+         (sha1 (ironclad:byte-array-to-hex-string (ironclad:digest-sequence :sha1 octets))))
+    (alexandria:write-byte-vector-into-file octets
+                                            (ensure-directories-exist (content-path article sha1))
+                                            :if-exists :supersede
+                                            :if-does-not-exist :create)
+    sha1))
+
+(defun revision-content (revision)
+  (alexandria:read-file-into-string
+   (content-path (revision-article revision) (revision-content-sha1 revision))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; changes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar *recent-revisions* (make-array 100 :initial-element nil))
+(defvar *recent-revisions-latest* 0)
+(defvar *recent-revisions-lock* (bt:make-lock))
+
+(defun get-recent-revisions ()
+  (bt:with-lock-held (*recent-revisions-lock*)
+    (let ((l (length *recent-revisions*)))
+      (loop for i from 0 below l appending
+           (let ((revision (aref *recent-revisions* (mod (+ i *recent-revisions-latest*) l))))
+             (when revision (list revision)))))))
+
+(defun add-revision (article summary content &key
+                     (author *user*)
+                     (author-ip (hunchentoot:real-remote-addr))
+                     (date (get-universal-time)))
+  (add-revision-txn article
+                    (make-instance 'revision
+                                   :article article
+                                   :author author
+                                   :author-ip author-ip
+                                   :date date
+                                   :summary summary
+                                   :content-sha1 (save-content article content))
+                    (content-categories content)))
+
+(deftransaction add-revision-txn (article revision content-categories)
+  (push revision (article-revisions article))
+  (setf (article-category-list article) content-categories)
+  (bt:with-lock-held (*recent-revisions-lock*)
+    (setf *recent-revisions-latest* (mod (1+ *recent-revisions-latest*) (length *recent-revisions*))
+          (aref *recent-revisions* *recent-revisions-latest*) revision)))

@@ -2,12 +2,6 @@
 
 (in-package #:cliki2)
 
-(defgeneric render-article-revision (drawer article revision mode))
-
-(defgeneric render-handle-markup (drawer content))
-
-(defgeneric apply-template (drawer template &rest args &key &allow-other-keys))
-
 (defgeneric render-key-data (drawer pagetype &rest args &key &allow-other-keys))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -16,11 +10,11 @@
 
 (defclass drawer () ())
 
-(defmethod apply-template ((drawer drawer) template &rest args &key &allow-other-keys)
+(defun apply-template (drawer template &rest args &key &allow-other-keys)
   (funcall template
    (concatenate 'list
                 args
-                (list :user  
+                (list :user
                       (if *user*
                           (list :name (user-name *user*)
                                 :href (restas:genurl 'view-person
@@ -30,42 +24,54 @@
                                 :sign-in (restas:genurl 'sign-in)
                                 :callback (hunchentoot:referer)))))))
 
-(defmethod render-handle-markup ((drawer drawer) content)  
-  (generate-html-from-markup content))
-
-(defun article-action-list (article mode
-                            &aux (title (article-title article)))
-  (case mode
-    (:view (list :edit (restas:genurl 'edit-article :title title)
-                 :raw (restas:genurl 'view-article-source :title title)
-                 :history (restas:genurl 'view-article-history :title title)))
-    
-    (:history (list :view (restas:genurl 'view-article :title title)))
-
-    (:revision (list :view (restas:genurl 'view-article :title title)
-                     :history (restas:genurl 'view-article-history :title title)))))
-
-
-(defmethod render-article-revision ((drawer drawer) (article article) (revision revision) mode)
+(defun article-action-list (article mode)
   (let ((title (article-title article)))
-    (apply-template drawer
-                    'cliki2.view:view-article
-                    :title title
-                    :content (render-handle-markup drawer (revision-content revision))
-                    :links (article-action-list article mode))))
+    (case mode
+      (:view (list :edit (restas:genurl 'edit-article :title title)
+                   :raw (restas:genurl 'view-article-source :title title)
+                   :history (restas:genurl 'view-article-history :title title)))
+      (:history (list :view (restas:genurl 'view-article :title title)))
+
+      (:revision (list :view (restas:genurl 'view-article :title title)
+                       :history (restas:genurl 'view-article-history :title title))))))
+
+
+(defun render-article-revision (drawer article revision mode)
+  (apply-template drawer
+                  'cliki2.view:view-article
+                  :title (article-title article)
+                  :content (generate-html-from-markup (revision-content revision))
+                  :links (article-action-list article mode)))
+
+
+(defun revision-summary-list (revisions)
+  (loop for revision in revisions collect
+       (let ((title (article-title (revision-article revision))))
+         (list :href (restas:genurl 'view-article-revision
+                                    :title title
+                                    :mark (revision-content-sha1 revision))
+               :date (hunchentoot:rfc-1123-date (revision-date revision))
+               :author (let ((name (user-name (revision-author revision))))
+                         (list :name name
+                               :href (restas:genurl 'view-person
+                                                    :name name)))
+               :title title
+               :summary (revision-summary revision)))))
+
+;; article
+
+
+(defmethod restas:render-object ((drawer drawer) (article article))
+  (apply-template drawer
+                  'cliki2.view:view-article
+                  :title (article-title article)
+                  :content (generate-html-from-markup (article-content article))
+                  :links (article-action-list article :view)))
 
 ;; key data
 
 (defmethod restas:render-object ((drawer drawer) (data list))
-  (apply 'render-key-data
-         drawer
-         (car data)
-         (cdr data)))
-
-;; article
-
-(defmethod restas:render-object ((drawer drawer) (article article))
-  (render-article-revision drawer article (article-last-revision article) :view))
+  (apply 'render-key-data drawer (car data) (cdr data)))
 
 ;; edit-article-page
 
@@ -99,27 +105,22 @@
 ;; article-history-page
 
 (defmethod render-key-data ((drawer drawer) (type (eql :article-history-page))
-                            &key article &aux (title (article-title article)))
+                            &key article)
   (apply-template drawer
                   'cliki2.view:view-article-history
-                  :title (format nil "History of page \"~A\"" title)
-                  :history (iter (for revision in (article-revisions article))
-                                 (collect
-                                     (list :href (restas:genurl 'view-article-revision
-                                                                :title title
-                                                                :mark (revision-content-sha1 revision))
-                                           :author (let ((name (user-name (revision-author revision))))
-                                                     (list :name name
-                                                           :href (restas:genurl 'view-person
-                                                                                :name name)))
-                                           :date (hunchentoot:rfc-1123-date (revision-date revision)))))
+                  :title (format nil "History of page \"~A\"" (article-title article))
+                  :revisions (revision-summary-list (article-revisions article))
                   :links (article-action-list article :history)))
 
 ;; article-revision-page
 
 (defmethod render-key-data ((drawer drawer) (type (eql :article-revision-page))
                             &key article revision)
-  (render-article-revision drawer article revision :revision))
+  (apply-template drawer
+                  'cliki2.view:view-article
+                  :title (article-title article)
+                  :content (generate-html-from-markup (revision-content revision))
+                  :links (article-action-list article :revision)))
 
 ;; login
 
@@ -140,23 +141,23 @@
 ;; register-sendmail-page
 
 (defmethod restas:render-object ((drawer drawer) (page (eql :register-sendmail-page)))
-  (apply-template drawer  
+  (apply-template drawer
                   'cliki2.view:register-continue))
 
 ;; confirm-registration
 
 (defmethod restas:render-object ((drawer drawer) (page (eql :confirm-registration-page)))
-  (apply-template drawer  
+  (apply-template drawer
                   'cliki2.view:confirm-registration))
-  
+
 ;; person
 
 (defmethod restas:render-object ((drawer drawer) (person user)
                                  &aux (name (user-name person)))
-  (apply-template drawer  
+  (apply-template drawer
                   'cliki2.view:view-person
                   :title name
-                  :content (render-handle-markup drawer (user-info person))
+                  :content (generate-html-from-markup drawer (user-info person))
                   :edit-link (if (and *user*
                                       (string= name (user-name *user*)))
                                  (restas:genurl 'edit-person :name name))))
@@ -165,7 +166,7 @@
 
 (defmethod render-key-data ((drawer drawer) (type (eql :edit-person-page))
                             &key person)
-  (apply-template drawer  
+  (apply-template drawer
                   'cliki2.view:edit-person
                   :title (user-name person)
                   :content (user-info person)))
@@ -174,7 +175,7 @@
 
 (defmethod render-key-data ((drawer drawer) (type (eql :preview-person-page))
                             &key person info)
-  (apply-template drawer  
+  (apply-template drawer
                   'cliki2.view:edit-person
                   :title (user-name person)
                   :content info
@@ -187,7 +188,7 @@
   (apply-template drawer
                   'cliki2.view:recent-changes
                   :changes changes))
-                                                 
+
 ;; forbidden
 
 (defmethod restas:render-object ((drawer drawer) (code (eql hunchentoot:+http-forbidden+)))

@@ -1,7 +1,8 @@
 ;;;; cliki2.asd
 
-(defsystem cliki2
+(asdf:defsystem :cliki2
     :depends-on (#:restas-directory-publisher
+                 #:bordeaux-threads
                  #:bknr.datastore
                  #:ironclad
                  #:docutils

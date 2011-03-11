@@ -61,21 +61,15 @@
                                 :key (restas:context-symbol-value context '*cookie-cipher-key*)))
 
     (let ((*store* nil))
-
-      (open-store (merge-pathnames "store/" *datadir*)
-                  :class-name 'cliki2-store)
+      (open-store (merge-pathnames "store/" *datadir*))
       (setf (restas:context-symbol-value context '*store*)
             *store*))))
 
 ;;;; compile templates
 
 (defun compile-all-templates ()
-  (flet ((tmplpath (name)
-           (merge-pathnames (format nil "templates/~A.tmpl" name)
-                            *basepath*)))
-    (closure-template:compile-template :common-lisp-backend
-                                       (mapcar #'tmplpath
-                                               '("core" "article" "person" "auth" "markup")))))
+  (closure-template:compile-template :common-lisp-backend
+                                     (cl-fad:list-directory (merge-pathnames "templates/" *basepath*))))
 
 (compile-all-templates)
 

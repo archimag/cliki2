@@ -14,15 +14,7 @@
 
 (restas:define-route recent-changes ("specials/recent-changes")
   (list :recent-changes-page
-        :changes (iter (for item in (cliki2-recent-changes *store*))
-                       (collect
-                           (destructuring-bind (object user date comment) item
-                             (list* :date (hunchentoot:rfc-1123-date date)
-                                    :user (list :href (restas:genurl 'view-person
-                                                                     :name (user-name user))
-                                                :name (user-name user))
-                                    :comment comment
-                                    (object-link-info object)))))))
+        :revisions (revision-summary-list (get-recent-revisions))))
 
 
 (restas:define-route recent-changes-feed ("feed/rss.xml"
@@ -31,4 +23,3 @@
   (list* :title "CLiki Recent Changes"
         :link (restas:gen-full-url 'recent-changes-feed)
         (cdr (recent-changes))))
-  

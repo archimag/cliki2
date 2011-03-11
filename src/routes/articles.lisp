@@ -26,27 +26,11 @@
                                    :method :post
                                    :requirement (check-edit-command "save"))
   (check-article-edit-access)
-  (let* ((article (or (article-with-title title)
-                      (with-transaction ()
-                        (make-instance 'article :title title))))
-         (content (hunchentoot:post-parameter "content"))
-         (categories (content-categories content))
-         (content-sha1 (save-content content)))
-    (with-transaction ()
-      (push (make-instance 'revision
-                           :content-sha1 content-sha1
-                           :author *user*
-                           :author-ip (hunchentoot:real-remote-addr))
-            (article-revisions article))
-      (setf (article-category-list article)
-            categories)))
-  (unless (hunchentoot:post-parameter "minoredit")
-    (add-change (article-with-title title)
-                *user*
-                (get-universal-time)
-                (hunchentoot:post-parameter "summary")))
-  (restas:redirect 'view-article
-                   :title title))
+  (add-revision (or (article-with-title title)
+                    (make-instance 'article :title title))
+                (hunchentoot:post-parameter "summary")
+                (hunchentoot:post-parameter "content"))
+  (restas:redirect 'view-article :title title))
 
 (restas:define-route preview-article ("edit/:title"
                                       :method :post
