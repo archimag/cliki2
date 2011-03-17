@@ -157,7 +157,7 @@
   (apply-template drawer
                   'cliki2.view:view-person
                   :title name
-                  :content (generate-html-from-markup drawer (user-info person))
+                  :content (generate-html-from-markup (user-info person))
                   :edit-link (if (and *user*
                                       (string= name (user-name *user*)))
                                  (restas:genurl 'edit-person :name name))))
