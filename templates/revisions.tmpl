@@ -1,0 +1,63 @@
+// -*- closure-template-html -*-
+
+{namespace cliki2.view}
+
+{template view-revisions-list}
+    <ul>
+        {foreach $revision in $revisions}
+            <li>
+                <a href="{$revision.href}">{$revision.date}</a>
+                <a href="{$revision.author.href}">{$revision.author.name}</a>
+                {$revision.title} - {$revision.summary}
+            </li>
+        {/foreach}
+    </ul>
+{/template}
+
+{template recent-changes}
+    {call base}
+        {param title: 'Recent Changes' /}
+        {param user: $user /}
+        {param body}
+            <h1>Recent Changes</h1>
+
+            {call view-revisions-list}
+                {param revisions: $revisions /}
+            {/call}
+        {/param}
+    {/call}
+{/template}
+
+
+{template rss-feed}
+   {nil}<?xml version="1.0" encoding="utf-8"?>{\n}
+    <rss version="2.0">
+        <channel>
+            <title>{$title}</title>
+            <link>{$link}</link>
+            <description>{$description}</description>
+
+            {foreach $item in $revisions}
+                <item>
+                    <title>{$item.author.name}: {$item.title}</title>
+                    <link>{$item.href}</link>
+                    <description>{$item.summary}</description>
+                    <pubDate>{$item.date}</pubDate>
+                </item>
+            {/foreach}
+        </channel>
+    </rss>
+{/template}
+
+{template view-article-history}
+    {call base}
+        {param title: 'History of article: ' + $title /}
+        {param user: $user /}
+        {param body}
+            {call view-revisions-list}
+                {param revisions: $revisions /}
+            {/call}
+            {call article-action-links data="$links" /}
+        {/param}
+    {/call}
+{/template}

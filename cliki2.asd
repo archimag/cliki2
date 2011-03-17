@@ -5,16 +5,17 @@
                  #:bordeaux-threads
                  #:bknr.datastore
                  #:ironclad
-                 #:docutils
                  #:colorize
-                 #:cl-recaptcha)
+                 #:cl-recaptcha
+                 #:3bmd)
     :components
     ((:module "src"
               :components
               ((:file "defmodule")
                (:file "sendmail" :depends-on ("defmodule"))
                (:file "model" :depends-on ("defmodule"))
-               (:file "markup" :depends-on ("defmodule"))
+               (:file "categories" :depends-on ("defmodule"))
+               (:file "markup" :depends-on ("categories" "defmodule"))
                (:file "view" :depends-on ("model" "markup"))
                (:file "auth-core" :depends-on ("model"))
                (:module "routes"

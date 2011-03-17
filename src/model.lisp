@@ -182,7 +182,8 @@
 
 (deftransaction add-revision-txn (article revision content-categories)
   (push revision (article-revisions article))
-  (setf (article-category-list article) content-categories)
+  ;; interning symbols has to be done in transaction because bknr.datastore hates symbols
+  (setf (article-category-list article) (mapcar #'category-keyword content-categories))
   (bt:with-lock-held (*recent-revisions-lock*)
     (setf *recent-revisions-latest* (mod (1+ *recent-revisions-latest*) (length *recent-revisions*))
           (aref *recent-revisions* *recent-revisions-latest*) revision)))

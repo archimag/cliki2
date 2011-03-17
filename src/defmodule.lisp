@@ -1,8 +1,7 @@
 ;;;; defmodule.lisp
 
 (restas:define-module #:cliki2
-  (:use #:cl #:iter #:bknr.datastore #:bknr.indices)
-  (:import-from #:docutils.parser.rst #:&option #:&content #:&content-parser #:&allow-spaces))
+  (:use #:cl #:iter #:bknr.datastore #:bknr.indices))
 
 (in-package #:cliki2)
 
