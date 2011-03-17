@@ -1,5 +1,18 @@
 (in-package #:cliki2)
 
+(defun htmlize-old-cliki-page (file &aux (str (alexandria:read-file-into-string file)))
+  (with-output-to-string (out)
+    (dolist (p (ppcre:split "\\n\\s*\\n" str))
+      (format out "<p>~A</p>" p))))
+
+(defun convert-old-cliki-page (file)
+  (with-input-from-string (in (htmlize-old-cliki-page file))
+    (with-output-to-string (s)
+      (external-program:run "/usr/bin/pandoc"
+                            (list "-f" "html" "-t" "markdown" "-")
+                            :input in
+                            :output s))))
+
 (defun load-old-articles (old-article-dir &key verbose)
   "WARNING: This WILL blow away your old store."
   (let ((old-articles (make-hash-table :test 'equal))
@@ -43,10 +56,7 @@
              (dolist (file (gethash article-title old-articles))
                (add-revision article
                              "CLiki import"
-                             (with-output-to-string (s)
-                               (external-program:run "/usr/bin/pandoc"
-                                                     (list "-f" "html" "-t" "markdown" file)
-                                                     :output s))
+                             (convert-old-cliki-page file)
                              :author cliki-import-user
                              :author-ip "0.0.0.0"
                              :date (+ (incf timestamp-skew) (file-write-date file))))))))
