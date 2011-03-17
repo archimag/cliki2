@@ -1,6 +1,6 @@
 (in-package #:cliki2)
 
-(defun load-old-articles (old-article-dir)
+(defun load-old-articles (old-article-dir &key verbose)
   "WARNING: This WILL blow away your old store."
   (let ((old-articles (make-hash-table :test 'equal))
         (store-dir (merge-pathnames "store/" *datadir*)))
@@ -31,9 +31,15 @@
                                             :name "CLiki-import"
                                             :email "noreply@cliki.net"
                                             :password "nohash")))
-      (loop for article-title being the hash-key of old-articles do
+      (loop for i from 0
+         for article-title being the hash-key of old-articles do
            (let ((article (make-instance 'article :title article-title))
                  (timestamp-skew 0)) ;; needed because some revisions have identical timestamps
+             (when verbose
+               (format t
+                       "~A%; Convert ~A~%"
+                       (floor (* (/ i (hash-table-count old-articles)) 100))
+                       article-title))
              (dolist (file (gethash article-title old-articles))
                (add-revision article
                              "CLiki import"
