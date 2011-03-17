@@ -53,7 +53,9 @@
                        "~A%; Convert ~A~%"
                        (floor (* (/ i (hash-table-count old-articles)) 100))
                        article-title))
-             (dolist (file (gethash article-title old-articles))
+             (dolist (file (sort (copy-list (gethash article-title old-articles))
+                                 #'<
+                                 :key #'file-write-date))
                (add-revision article
                              "CLiki import"
                              (convert-old-cliki-page file)
