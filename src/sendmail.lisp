@@ -13,16 +13,6 @@
                    'string))))
 
 (defun sendmail (to content)
-  #+sbcl
-  (let* ((sendmail-process (sb-ext:run-program *sendmail*
-                                               to
-                                               :input :stream
-                                               :output nil
-                                               :error nil
-                                               :wait nil))
-         (sendmail (sb-ext:process-input sendmail-process)))
-    (unwind-protect
-         (write-string content sendmail)
-      (close sendmail)
-      (sb-ext:process-wait sendmail-process)
-      (sb-ext:process-close sendmail-process))))
+  (with-input-from-string (i content)
+    (external-program:run *sendmail* to :input i)))
+
