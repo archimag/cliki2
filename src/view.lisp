@@ -184,10 +184,10 @@
 ;; recent-changes-page
 
 (defmethod render-key-data ((drawer drawer) (type (eql :recent-changes-page))
-                            &key changes)
+                            &key revisions)
   (apply-template drawer
                   'cliki2.view:recent-changes
-                  :changes changes))
+                  :revisions revisions))
 
 ;; forbidden
 
