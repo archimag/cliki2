@@ -37,6 +37,7 @@
   (let ((old-articles (make-hash-table :test 'equal))
         (store-dir (merge-pathnames "store/" *datadir*)))
     (close-store)
+    (ensure-directories-exist store-dir)
     (cl-fad:delete-directory-and-files store-dir)
     (open-store store-dir)
     (dolist (file (cl-fad:list-directory old-article-dir))
