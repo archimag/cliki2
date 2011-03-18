@@ -20,12 +20,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun convert-old-cliki-page (file)
-  (with-input-from-string (in (htmlize-old-cliki-page file))
-    (with-output-to-string (s)
-      (external-program:run "/usr/bin/pandoc"
-                            (list "-f" "html" "-t" "markdown" "-")
-                            :input in
-                            :output s))))
+  (cliki2.converter.artefacts:remove-artefacts
+   (with-input-from-string (in (htmlize-old-cliki-page file))
+     (with-output-to-string (s)
+       (external-program:run "/usr/bin/pandoc"
+                             (list "-f" "html" "-t" "markdown" "-")
+                             :input in
+                             :output s)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; load-old-articles
