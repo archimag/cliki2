@@ -1,7 +1,12 @@
 ;;;; defmodule.lisp
 
+(defpackage #:cliki2.markup
+  (:use #:cl #:iter #:esrap)
+  (:export #:generate-html-from-markup))
+
 (restas:define-module #:cliki2
-  (:use #:cl #:iter #:bknr.datastore #:bknr.indices))
+  (:use #:cl #:iter #:bknr.datastore #:bknr.indices #:cliki2.markup)
+  (:export #:view-article #:view-person))
 
 (in-package #:cliki2)
 

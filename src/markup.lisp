@@ -1,30 +1,105 @@
 ;;;; markup.lisp
 
-(in-package #:cliki2)
+(in-package #:cliki2.markup)
+
+(defvar *cliki2-rules* (alexandria:copy-hash-table esrap::*rules*))
+
+(defmacro with-cliki2-rules (&body body)
+  `(let ((esrap::*rules* *cliki2-rules*))
+     ,@body))
+
+(defmacro define-rule (symbol expression &body options)
+  `(with-cliki2-rules
+     (defrule ,symbol ,expression ,@options)))
+
+(defun parse-cliki2-markup (symbol text &key (start 0) end junk-allowed)
+  (with-cliki2-rules
+    (parse symbol text
+           :start start
+           :end end
+           :junk-allowed junk-allowed)))
+
+
+(defun parse-cliki2-doc (markup &aux (curpos 0))
+  (iter (multiple-value-bind (block pos)
+            (parse-cliki2-markup '3bmd-grammar::block markup :start curpos :junk-allowed t)
+          (while block)
+          (collect block)
+          (while pos)
+          (setf curpos pos))))
 
 (defun generate-html-from-markup (markup)
-  (with-output-to-string (s)
-    (3bmd:parse-string-and-print-to-stream markup s)))
+  (let ((input (3bmd::expand-tabs markup :add-newlines t)))
+    (with-output-to-string (s)
+      (3bmd:print-doc-to-stream (parse-cliki2-doc input) s))))
 
-;;;; article-ref (_())
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; cliki2 markup extensions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define-rule article-link (and (and (? #\\) "_(") (+ (and (! #\)) character)) #\))
+  (:destructure (start article end)
+    (declare (ignore start end))
+    (cons :article-link (concat article))))
 
-;;;; person-ref (_())
+(defmethod 3bmd::print-tagged-element ((tag (eql :article-link)) stream title)
+  (write-string (cliki2.view:article-link
+                 (list :title title
+                       :href (restas:genurl 'cliki2:view-article :title title)))
+                stream))
 
-;;;; hypespec-ref ???
+(define-rule person-link (and "_P(" (+ (and (! #\)) character)) #\))
+  (:destructure (start name end)
+    (declare (ignore start end))
+    (cons :person-link (concat name))))
 
-;;;; code-block <code></code>
+(defmethod 3bmd::print-tagged-element ((tag (eql :person-link)) stream name)
+  (write-string (cliki2.view:person-link
+                 (list :name name
+                       :href (restas:genurl 'cliki2:view-person :name name)))
+                stream))
 
-;; (defmethod docutils:visit-node ((writer docutils.writer.html:html-writer) (node code-block))
-;;   (let ((lang (car (assoc (code-block-lang node)
-;;                           (colorize:coloring-types)
-;;                           :test #'string-equal))))
-;;     (if lang
-;;         (append-template 'cliki2.view:code-block
-;;                          :code (colorize::html-colorization :common-lisp
-;;                                                             (code-block-code node)))
-;;         (docutils:part-append
-;;          (format nil "<pre>~A</pre>" (code-block-code node))))))
+(define-rule hyperspec-link (and "_H(" (+ (and (! #\)) character)) #\))
+  (:destructure (start symbol end)
+    (declare (ignore start end))
+    (cons :hyperspec-link (concat symbol))))
+
+(defmethod 3bmd::print-tagged-element ((tag (eql :hyperspec-link)) stream symbol)
+  (write-string (cliki2.view:hyperspec-link
+                 (list :symbol symbol
+                       :href (clhs-lookup:spec-lookup symbol)))
+                stream))
+
+(define-rule 3bmd-grammar::link
+    (or 3bmd-grammar::explicit-link
+        3bmd-grammar::reference-link
+        3bmd-grammar::auto-link
+        article-link
+        person-link
+        hyperspec-link))
+
+(define-rule empty-lines
+    (* (and (* (or #\Space #\Tab)) (? #\Return) #\Newline)))
+
+(define-rule code-block (and "<code>"
+                             empty-lines
+                             (+ (and (! (and empty-lines "</code>")) character))
+                             empty-lines
+                             "</code>")
+  (:destructure (start w1 code w2 end)
+    (declare (ignore start w1 w2 end))
+    (cons :lisp-code-block (concat code))))
+
+(defmethod 3bmd::print-tagged-element ((tag (eql :lisp-code-block)) stream code)
+  (write-string (cliki2.view:code-block
+                 (list :code (colorize::html-colorization :common-lisp code)))
+                stream))
+  
+(define-rule 3bmdcode (or 3bmd-grammar::code1 3bmd-grammar::code2 3bmd-grammar::code3 3bmd-grammar::code4 3bmd-grammar::code5)
+  (:lambda (a)
+    (list :code a)))
+
+(define-rule 3bmd-grammar::code (or 3bmdcode code-block))
 
 ;;;; category *()
 
