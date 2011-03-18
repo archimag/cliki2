@@ -1,7 +1,5 @@
 (in-package #:cliki2)
 
-(defpackage #:cliki2.categories)
-
 (defun category-keyword (category-title)
   (intern (string-upcase category-title) '#:cliki2.categories))
 

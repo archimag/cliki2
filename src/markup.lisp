@@ -70,13 +70,19 @@
                        :href (clhs-lookup:spec-lookup symbol)))
                 stream))
 
+(define-rule category-link (and (and (? #\\) "*(") (+ (and (! #\)) character)) #\))
+  (:destructure (start category end)
+    (declare (ignore start end))
+    (cons :article-link (concat category))))
+
 (define-rule 3bmd-grammar::link
     (or 3bmd-grammar::explicit-link
         3bmd-grammar::reference-link
         3bmd-grammar::auto-link
         article-link
         person-link
-        hyperspec-link))
+        hyperspec-link
+        category-link))
 
 (define-rule empty-lines
     (* (and (* (or #\Space #\Tab)) (? #\Return) #\Newline)))
@@ -99,18 +105,29 @@
   (:lambda (a)
     (list :code a)))
 
-(define-rule 3bmd-grammar::code (or 3bmdcode code-block))
+(defun category-char-p (character)
+  (not (member character '(#\: #\" #\)))))
 
-;;;; category *()
+(define-rule category-name (and (? #\") (+ (category-char-p character)) (? #\"))
+  (:lambda (list)
+    (concat (second list))))
 
-;;;; category list /()
-
-;; (defmethod docutils:visit-node ((writer docutils.writer.html:html-writer) (node category-content))
-;;   (append-template 'cliki2.view:category-content
-;;                    :items (iter (for article in (articles-with-category (category-content-title node)))
-;;                                 (collect
-;;                                     (list :title (article-title article)
-;;                                           :href (restas:genurl 'view-article
-;;                                                                :title (article-title article)))))))
+(define-rule category-list (and (and (? #\\) "_/(")
+                                category-name
+                                (* (and (! #\)) character))                                
+                                ")")
+  (:lambda (list)
+    (cons :cliki2-category-list (cliki2:category-keyword (second list)))))
 
 
+(defmethod 3bmd::print-tagged-element ((tag (eql :cliki2-category-list)) stream category)
+  (write-string (cliki2.view:category-content
+                 (list :items
+                       (iter (for article in (cliki2::articles-with-category category))
+                             (collect
+                                 (list :title (cliki2::article-title article)
+                                       :href (restas:genurl 'cliki2:view-article
+                                                            :title (cliki2::article-title article)))))))
+                stream))
+
+(define-rule 3bmd-grammar::code (or 3bmdcode code-block category-list))
