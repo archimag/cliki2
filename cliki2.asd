@@ -3,6 +3,7 @@
 (asdf:defsystem :cliki2
     :depends-on (#:restas-directory-publisher
                  #:bordeaux-threads
+                 #:external-program
                  #:bknr.datastore
                  #:ironclad
                  #:colorize
