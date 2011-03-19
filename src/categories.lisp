@@ -1,12 +1,11 @@
 (in-package #:cliki2)
 
-(defun normalize-category-name (str)
-  (string-upcase
-   (string-trim #(#\Space #\Tab #\Newline #\Return)
-                (ppcre:regex-replace-all "\\s+" str " "))))
+(defun normalize-name (str)
+  (string-trim #(#\Space #\Tab #\Newline #\Return)
+               (ppcre:regex-replace-all "\\s+" str " ")))
 
 (defun category-keyword (category-title)
-  (intern (normalize-category-name category-title)
+  (intern (string-upcase (normalize-name category-title))
           '#:cliki2.categories))
 
 (defun content-categories (markup)
