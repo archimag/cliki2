@@ -9,6 +9,7 @@
 (restas:define-module #:cliki2
   (:use #:cl #:iter #:bknr.datastore #:bknr.indices #:cliki2.markup)
   (:export #:view-article #:view-person
+           #:normalize-name
            #:category-keyword))
 
 (in-package #:cliki2)

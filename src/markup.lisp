@@ -40,7 +40,7 @@
 (define-rule article-link (and (and (? #\\) "_(") (+ (and (! #\)) character)) #\))
   (:destructure (start article end)
     (declare (ignore start end))
-    (cons :article-link (concat article))))
+    (cons :article-link (cliki2:normalize-name (concat article)))))
 
 (defmethod 3bmd:print-tagged-element ((tag (eql :article-link)) stream title)
   (write-string (cliki2.view:article-link
@@ -51,7 +51,7 @@
 (define-rule person-link (and "_P(" (+ (and (! #\)) character)) #\))
   (:destructure (start name end)
     (declare (ignore start end))
-    (cons :person-link (concat name))))
+    (cons :person-link (cliki2:normalize-name (concat name)))))
 
 (defmethod 3bmd:print-tagged-element ((tag (eql :person-link)) stream name)
   (write-string (cliki2.view:person-link
@@ -73,7 +73,7 @@
 (define-rule category-link (and (and (? #\\) "*(") (+ (and (! #\)) character)) #\))
   (:destructure (start category end)
     (declare (ignore start end))
-    (cons :article-link (concat category))))
+    (cons :article-link (cliki2:normalize-name (concat category)))))
 
 (define-rule empty-lines
     (* (and (* (or #\Space #\Tab)) (? #\Return) #\Newline)))
