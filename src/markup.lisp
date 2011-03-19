@@ -2,31 +2,32 @@
 
 (in-package #:cliki2.markup)
 
-(defvar *cliki2-rules* (alexandria:copy-hash-table esrap::*rules*))
+(defvar *cliki2-rules* (alexandria:copy-hash-table *rules*))
+
+(defvar *cliki2-compiled-grammar* nil)
 
 (defmacro with-cliki2-rules (&body body)
-  `(let ((esrap::*rules* *cliki2-rules*))
+  `(let ((*rules* *cliki2-rules*))
      ,@body))
+
+(defun recompile-cliki2-grammar ()
+  (setf *cliki2-compiled-grammar*
+        (esrap:compile-grammar '3bmd-grammar::block)))
 
 (defmacro define-rule (symbol expression &body options)
   `(with-cliki2-rules
      (defrule ,symbol ,expression ,@options)))
 
-(defun parse-cliki2-markup (symbol text &key (start 0) end junk-allowed)
-  (with-cliki2-rules
-    (parse symbol text
-           :start start
-           :end end
-           :junk-allowed junk-allowed)))
-
-
 (defun parse-cliki2-doc (markup &aux (curpos 0))
-  (iter (multiple-value-bind (block pos)
-            (parse-cliki2-markup '3bmd-grammar::block markup :start curpos :junk-allowed t)
-          (while block)
-          (collect block)
-          (while pos)
-          (setf curpos pos))))
+  (with-cliki2-rules
+    (unless *cliki2-compiled-grammar*
+      (recompile-cliki2-grammar))
+    (iter (multiple-value-bind (block pos)
+              (parse *cliki2-compiled-grammar* markup :start curpos :junk-allowed t)
+            (while block)
+            (collect block)
+            (while pos)
+            (setf curpos pos)))))
 
 (defun generate-html-from-markup (markup)
   (let ((input (3bmd::expand-tabs markup :add-newlines t)))
@@ -116,8 +117,6 @@
                                        :href (restas:genurl 'cliki2:view-article
                                                             :title (cliki2::article-title article)))))))
                 stream))
-
-
 
 (define-rule 3bmd-grammar:inline-extensions
     (or article-link
