@@ -37,6 +37,7 @@
   (let ((old-articles (make-hash-table :test 'equal))
         (store-dir (merge-pathnames "store/" *datadir*)))
     (close-store)
+    (ensure-directories-exist store-dir)
     (cl-fad:delete-directory-and-files store-dir)
     (open-store store-dir)
     (dolist (file (cl-fad:list-directory old-article-dir))
@@ -61,6 +62,7 @@
       (loop for i from 0
          for article-title being the hash-key of old-articles do
            (let ((article (make-instance 'article :title article-title))
+                 (content nil)
                  (timestamp-skew 0)) ;; needed because some revisions have identical timestamps
              (when verbose
                (format t
@@ -72,10 +74,12 @@
                                  :key #'file-write-date))
                (add-revision article
                              "CLiki import"
-                             (convert-old-cliki-page file)
+                             (setf content (convert-old-cliki-page file))
                              :author cliki-import-user
                              :author-ip "0.0.0.0"
-                             :date (+ (incf timestamp-skew) (file-write-date file))))))))
+                             :date (+ (incf timestamp-skew) (file-write-date file))
+                             :add-to-index nil))
+             (add-article-to-index article-title content)))))
   ;; fix up recent revisions
   (replace *recent-revisions* (sort (store-objects-with-class 'revision) #'< :key #'revision-date))
   (setf *recent-revisions-latest* 99))

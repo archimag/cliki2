@@ -29,19 +29,25 @@
             </div>
 
             <div id="banner">
-                <a title="cliki home atricle" class="logo" href="http://www.cliki.net/">
-                    CL<span class="sub">iki</span> 
-                </a> 
-                the common lisp wiki
-                <br />
-                
-                <div id="navbar">
-                    <a href="/">home</a> 
-                    <a href="/specials/recent-changes">recent changes</a> 
-                    <a href="/about">about cliki</a> 
-                    <a href="/Text%20Formating">text formatting</a> 
-                    /*<a>create new article</a> */
-                </div> 
+                <form action="/specials/search">
+                    <span class="search">
+                        <input  name="query" size="30" />
+                        <input  type="submit" value="Search" />
+                    </span>
+                    
+                    <a title="cliki home atricle" class="logo" href="http://www.cliki.net/">
+                        CL<span class="sub">iki</span> 
+                    </a> 
+                    the common lisp wiki
+                    <br />
+                    
+                    <div id="navbar">
+                        <a href="/">home</a> 
+                        <a href="/specials/recent-changes">recent changes</a> 
+                        <a href="/about">about cliki</a> 
+                        <a href="/Text%20Formating">text formatting</a> 
+                    </div>
+                </form>
             </div> 
 
             {$body |noAutoescape}
