@@ -50,6 +50,10 @@
 
 (defvar *user-auth-cipher*)
 
+;;;; search
+
+(defparameter *search-page-number-results* 10)
+
 ;;;; store
 
 (defparameter *datadir* #P"/var/cliki2/")

@@ -189,6 +189,36 @@
                   'cliki2.view:recent-changes
                   :revisions revisions))
 
+;; search-page
+
+(defun article-short-info (article)
+  (list :href (restas:genurl 'view-article
+                             :title (article-title article))
+        :title (article-title article)
+        :labels (mapcar #'string-downcase (article-category-list article))
+        :changed (hunchentoot:rfc-1123-date (revision-date (article-latest-revision article)))))
+
+(defmethod render-key-data ((drawer drawer) (type (eql :search-page))
+                            &key query start articles total)
+  (flet ((url (first)
+           (format nil
+                   "~A?query=~A&start=~A"
+                   (restas:genurl 'search-page)
+                   (closure-template:encode-uri-component query)
+                   first)))
+    (apply-template drawer
+                    'cliki2.view:search-results
+                    :query query
+                    :start start
+                    :total total
+                    :href-after (if (> start 0)
+                                    (url (max (- start *search-page-number-results*) 0)))
+                    :href-before (if (> (- total start) *search-page-number-results*)
+                                     (url (+ start *search-page-number-results*)))
+                    :articles (iter (for (article . score) in articles)
+                                    (collect (list* :score score
+                                                    (article-short-info article)))))))
+
 ;; forbidden
 
 (defmethod restas:render-object ((drawer drawer) (code (eql hunchentoot:+http-forbidden+)))
