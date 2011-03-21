@@ -8,7 +8,8 @@
                  #:ironclad
                  #:colorize
                  #:cl-recaptcha
-                 #:3bmd)
+                 #:3bmd
+                 #:montezuma)
     :components
     ((:module "src"
               :components

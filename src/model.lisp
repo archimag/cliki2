@@ -2,6 +2,22 @@
 
 (in-package #:cliki2)
 
+;;;; search index
+
+(defparameter *search-index*
+  (make-instance 'montezuma:index
+                 :path #P"/var/cliki2/index"))
+
+(defun add-article-to-index (title content)
+  (let ((doc (montezuma:get-document *search-index*
+                                     (montezuma:make-term "title" title))))
+    (cond
+      (doc (setf (montezuma:document-value doc "content")
+                 content))
+      (t (montezuma:add-document-to-index *search-index*
+                                          `(("title" . ,title)
+                                            ("content" . ,content)))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; user
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -169,7 +185,8 @@
 (defun add-revision (article summary content &key
                      (author *user*)
                      (author-ip (hunchentoot:real-remote-addr))
-                     (date (get-universal-time)))
+                     (date (get-universal-time))
+                     (add-to-index t))
   (add-revision-txn article
                     (make-instance 'revision
                                    :article article
@@ -178,7 +195,10 @@
                                    :date date
                                    :summary summary
                                    :content-sha1 (save-content article content))
-                    (content-categories content)))
+                    (content-categories content))
+  (when add-to-index
+    (add-article-to-index (article-title article)
+                          content)))
 
 (deftransaction add-revision-txn (article revision content-categories)
   (push revision (article-revisions article))

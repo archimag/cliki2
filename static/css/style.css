@@ -45,7 +45,7 @@ ul li { list-style-type: square }
   background: steelblue;
   border: 1px solid black;
   color: white;
-  margin: 0;  padding: 0.5em 0.5em 1.5em; 
+  margin: 0;  padding: 0.5em 0.5em;
 }
 #banner a { color: white; font-weight: normal; text-decoration: none; padding: 0 }
 #banner a:hover { background: transparent; color: white }
@@ -191,4 +191,28 @@ ul li { list-style-type: square }
 .error-info {
     color: red;
     font-size: 80%;
+}
+
+
+/* search page */
+
+.search-results {
+    margin-top: 0.4em;
+    margin-left: 1em;
+    margin-right: 1em;
+    border-top: 1px solid #B9B2CA;
+}
+
+.search-results a {
+    font-size: 120%;
+}
+
+.search-results > div {
+//    padding-top: 0.6em;
+    margin-bottom: 0.3em;
+    border-bottom: 1px solid #B9B2CA;
+}
+
+#search-form {
+    margin: 1em;
 }

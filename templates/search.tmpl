@@ -1,0 +1,64 @@
+// -*- closure-template-html -*-
+
+{namespace cliki2.view}
+
+{template nav-panel}
+  <div align="right" class="info">
+      {if $hrefAfter}<a href="{$hrefAfter}">« Before</a>{/if}
+      Results <strong>{$start}</strong> -
+      <strong>{min($start + length($articles) - 1, $total)}</strong>
+      from <strong>{$total}</strong>
+      {if $hrefBefore}<a href="{$hrefBefore}">Later »</a>{/if}
+  </div>
+{/template}
+
+
+{template search-results}
+    {call base}
+        {param title: 'Search results' /}
+        {param user: $user /}
+        {param body}
+            <form id="search-form">
+                <input name="query" 
+                       size="50"
+                       maxlength="400"
+                       type="search" autofocus 
+                       {if $query}value="{$query}"{/if}
+                       />
+                <input type="submit" value="Search" />
+            </form>
+
+            {if $articles}
+                {call nav-panel data="all" /}
+            
+                <div class="search-results">
+                    {foreach $article in $articles}
+                        <div>
+                            <a href="{$article.href}">
+                                {$article.title}
+                            </a>
+                            <div class="info">
+                                <strong>Score:</strong>
+                                {$article.score} <br />
+                                
+                                {if $article.labels}
+                                    <strong>Labels:</strong>
+                                    {foreach $label in $article.labels}
+                                        {if not isFirst($label)}, {/if}
+                                        {$label}
+                                    {/foreach}
+                                    <br/>
+                                {/if}
+
+                                <strong>Changed:</strong>
+                                {$article.changed}
+                            </div>
+                        </div>
+                    {/foreach}
+                </div>
+
+                {call nav-panel data="all" /}
+            {/if}
+        {/param}
+    {/call}
+{/template}
