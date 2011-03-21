@@ -27,5 +27,6 @@
                          (:file "articles" :depends-on ("check"))
                          (:file "person" :depends-on ("check"))
                          (:file "auth")
-                         (:file "specials"))
+                         (:file "specials")
+                         (:file "search"))
                         :depends-on ("view" "sendmail" "auth-core"))))))
