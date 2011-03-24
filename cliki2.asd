@@ -9,7 +9,8 @@
                  #:colorize
                  #:cl-recaptcha
                  #:3bmd
-                 #:montezuma)
+                 #:montezuma
+                 #:sanitize)
     :components
     ((:module "src"
               :components

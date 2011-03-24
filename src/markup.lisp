@@ -30,8 +30,9 @@
 
 (defun generate-html-from-markup (markup)
   (let ((input (3bmd::expand-tabs markup :add-newlines t)))
-    (with-output-to-string (s)
-      (3bmd:print-doc-to-stream (parse-cliki2-doc input) s))))
+    (sanitize:clean (with-output-to-string (s)
+                      (3bmd:print-doc-to-stream (parse-cliki2-doc input) s))
+                    sanitize:+relaxed+)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; cliki2 markup extensions
