@@ -1,0 +1,6 @@
+* Keep CameCased article titles on import
+* Mediawiki-style diffs
+* Allow anonymous edits
+* PBKDF2 password hashing (need to make contribution to ironclad)
+* Audio captcha
+
