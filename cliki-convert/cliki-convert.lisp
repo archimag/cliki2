@@ -41,8 +41,9 @@
     (cl-fad:delete-directory-and-files store-dir)
     (open-store store-dir)
     (dolist (file (cl-fad:list-directory old-article-dir))
-      (push file (gethash (string-downcase (hunchentoot:url-decode (substitute #\% #\= (pathname-name file))
-                                                                   hunchentoot::+latin-1+))
+      (push file (gethash (string-downcase ;; this kills CamelCased titles, but some articles had their case messed up, how???
+                           (hunchentoot:url-decode (substitute #\% #\= (pathname-name file))
+                                                   hunchentoot::+latin-1+))
                           old-articles)))
     ;; sort revisions and discard deleted pages
     (loop for article being the hash-key of old-articles do
@@ -56,7 +57,7 @@
            (remhash article old-articles)))
     ;; import into store
     (let ((cliki-import-user (make-instance 'user
-                                            :name "CLiki-import"
+                                            :name "CLiki-importer"
                                             :email "noreply@cliki.net"
                                             :password "nohash")))
       (loop for i from 0
@@ -69,11 +70,9 @@
                        "~A%; Convert ~A~%"
                        (floor (* (/ i (hash-table-count old-articles)) 100))
                        article-title))
-             (dolist (file (sort (copy-list (gethash article-title old-articles))
-                                 #'<
-                                 :key #'file-write-date))
+             (dolist (file (gethash article-title old-articles))
                (add-revision article
-                             "CLiki import"
+                             "import from CLiki"
                              (setf content (convert-old-cliki-page file))
                              :author cliki-import-user
                              :author-ip "0.0.0.0"
@@ -81,8 +80,8 @@
                              :add-to-index nil))
              (add-article-to-index article-title content)))))
   ;; fix up recent revisions
-  (replace *recent-revisions* (sort (store-objects-with-class 'revision) #'< :key #'revision-date))
-  (setf *recent-revisions-latest* 99))
+  (replace *recent-revisions* (sort (store-objects-with-class 'revision) #'> :key #'revision-date))
+  (setf *recent-revisions-latest* 0))
 
 ;; (load-old-articles "/home/viper/tmp/cliki/")
 
