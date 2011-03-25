@@ -68,7 +68,7 @@
 
   (restas:with-context context
     (setf (restas:context-symbol-value context '*user-auth-cipher*)
-          (ironclad:make-cipher :blowfish 
+          (ironclad:make-cipher :blowfish
                                 :mode :ecb
                                 :key (restas:context-symbol-value context '*cookie-cipher-key*)))
 
