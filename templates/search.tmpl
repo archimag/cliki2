@@ -18,16 +18,6 @@
         {param title: 'Search results' /}
         {param user: $user /}
         {param body}
-            <form id="search-form">
-                <input name="query" 
-                       size="50"
-                       maxlength="400"
-                       type="search" autofocus 
-                       {if $query}value="{$query}"{/if}
-                       />
-                <input type="submit" value="Search" />
-            </form>
-
             {if $articles}
                 {call nav-panel data="all" /}
             
@@ -62,3 +52,4 @@
         {/param}
     {/call}
 {/template}
+

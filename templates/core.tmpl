@@ -3,54 +3,59 @@
 {namespace cliki2.view}
 
 {template base}
+<!DOCTYPE html>{\n}
     <html>
         <head>
             <title>{$title}</title>
-
             <link  rel="alternate" type="application/rss+xml" title="recent changes" href="/feed/rss.xml">
-            
             <link  rel="stylesheet" href="/css/style.css">
             <link  rel="stylesheet" href="/css/colorize.css">
+            <script type="text/javascript" src="/js/jquery.js"></script>
+            <script type="text/javascript" src="/js/jquery.hint.js"></script>
+            <script type="text/javascript" src="/js/utils.js"></script>
         </head>
-        
+
         <body>
-            <div class="top">
-                {if $user.name}
+            <div id="pageheader">
+                <div id="header">
+                    <a title="CLiki: the common lisp wiki" id="logo" href="/">CL<span>iki</span></a>
+                    <span id="slogan">the common lisp wiki</span>
+
                     <div id="login">
-                        <a href="{$user.href}">{$user.name}</a> | 
-                        <a href="{$user.signOut}" id="logout">Sign Out</a>
+                        {if $user.name}
+                            Hello, <a href="{$user.href}">{$user.name}</a>
+                            <a href="{$user.signOut}">Log out</a>
+                        {else}
+                            <form method="post" action="{$user.signIn}">
+                                <input type="text" name="name" title="login" />
+                                <input type="password" name="password" />
+                                <input type="submit" value="enter" />
+                                <a id="registration" href="{$user.register}">Registration</a>
+                                <a id="forgot_password" href="{$forgotHref}">Forgot password</a>
+                            </form>
+                        {/if}
                     </div>
-                {else}
-                    <div id="login">
-                        <a href="{$user.signIn}{if $callback}?done={$callback}{/if}">Log In</a> |
-                        <a href="{$user.register}">Sign Up</a> 
-                    </div>
-                {/if}
+                </div> 
+            </div>
+            
+            <div id="navbar">
+                <ul>
+                    <li class="active"><a href="/">Home</a></li>
+                    <li><a href="/specials/recent-changes">Recent Changes</a></li>
+                    <li><a href="/about">About CLiki</a></li>
+                    <li><a href="/Text%20Formating">Text Formatting</a></li>
+                </ul>
+                <div id="search">
+                    <form action="/specials/search">
+                        <input type="text" name="query" {if $query}value="{$query}"{/if} />
+                        <input type="submit" value="search" />
+                    </form>
+                </div> 
             </div>
 
-            <div id="banner">
-                <form action="/specials/search">
-                    <span class="search">
-                        <input  name="query" size="30" />
-                        <input  type="submit" value="Search" />
-                    </span>
-                    
-                    <a title="cliki home atricle" class="logo" href="http://www.cliki.net/">
-                        CL<span class="sub">iki</span> 
-                    </a> 
-                    the common lisp wiki
-                    <br />
-                    
-                    <div id="navbar">
-                        <a href="/">home</a> 
-                        <a href="/specials/recent-changes">recent changes</a> 
-                        <a href="/about">about cliki</a> 
-                        <a href="/Text%20Formating">text formatting</a> 
-                    </div>
-                </form>
-            </div> 
-
-            {$body |noAutoescape}
+            <div id="content">
+                {$body |noAutoescape}
+            </div>
         </body> 
     </html>     
 {/template}
@@ -80,3 +85,4 @@
         {/param}
     {/call}
 {/template}
+

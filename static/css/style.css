@@ -1,218 +1,158 @@
-// style.css
+* {margin:0;padding:0;outline:0;font-family:Arial,Helvetica,sans-serif;}
 
-body 
-{  
-  background: white;
-  color: black;
-  font-family: serif;
-  margin: 0; padding: 0.5em;
+#pageheader {
+    background: url(../img/headerbg.png) top left repeat-x;
+    height: 109px;
 }
 
-h1, h2, h3, h4 
-{ 
-  color: #999;
-  font-family: sans-serif;
-}
-h3 { font-weight: bold; font-size: 175%; }
-
-hr { border: 0; background: black; height: 1px }
-a.internal { color: #0077bb ; }
-a:visited.internal { color: #004488; } 
-a.hyperspec { font-weight: bold; }
-
-a[href]:hover { background: #ff9 }
-
-/*
-table { border-collapse: collapse; border: 1px solid #aaa; }
-th 
-{ 
-  font-family: sans-serif; 
-  background: royalblue;
-  color: white;
-  text-transform: lowercase 
-}
-th, td { padding: 0.2em 0.3em }
-*/
-
-ul li { list-style-type: square }
-
-
-/*
- * banner
- */
-#banner
-{ 
-  background: steelblue;
-  border: 1px solid black;
-  color: white;
-  margin: 0;  padding: 0.5em 0.5em;
-}
-#banner a { color: white; font-weight: normal; text-decoration: none; padding: 0 }
-#banner a:hover { background: transparent; color: white }
-#banner a:hover.logo { text-decoration: none }
-#banner a.logo { font-family: serif; font-weight: bold; font-size: 250%; border-width: 0px }
-#banner a.logo .sub 
-{ 
-  color: gold;
-  font-size: 90%; 
-  position: relative; top: -0.3em; 
+#header {
+    height: 109px;
+    margin: 0 150px;
+    background: url(../img/feather.png) center top no-repeat transparent;
 }
 
-.search
-{ 
-  float: right; 
-  text-align: right;
-  padding:  1em 0 0;
+#logo {
+    display: block;
+    width: 150px;
+    height: 65px;
+    margin: 22px 0 0 20px;
+    text-indent: -9999px;
+    background: url(../img/logo.png) top left no-repeat;
+    float: left;
+    color: white;
+    font-size: 60px;
+    text-decoration: none;
 }
-.search input { border: 1px solid black }
+#logo span { color: #ffd700; font-size: 30px;vertical-align: top;}
 
-/* #navbar { margin: 1em 0 -0.5em 0 } */
-#navbar a 
-{ 
-  border: 1px solid gold;
-  border-width: 1px 0 1px 0;
-  font-size: 90%;
-  margin: 0 1em; padding: 0 0.2em 
-}
-#navbar a:hover
-{ 
-  border: 1px solid white;
-  border-width: 1px 0 1px 0;
-}
-
-.lastedit 
-{ 
-  color: gold;
-  float: right;
-  text-align: right; 
-  text-transform: lowercase;
-  margin: 0; padding: 0
+#slogan {
+    diaplay: block;
+    width: 247px;
+    height: 29px;
+    margin: 55px 0 0 10px;
+    float: left;
+    background: url(../img/slogan.png) left top no-repeat;
+    text-indent: -9999px;
 }
 
-/*
- * content
- */
-#content
-{ 
-  clear: both;
-  margin: 0; padding: 0 1.5em;
+#login {
+    width: 313px;
+    height: 23px;
+    float: right;
+    border: 1px solid #175487;
+    margin-top: 50px;
 }
 
-/*
- * footer
- */
-#footer
-{ 
-  background: steelblue;
-  color: white;
-  border: 1px solid black;
-  font-family: sans-serif;
-  margin-top: 0.5em; padding: 0.5em;
+#login input {margin:0;padding:0 10px;}
+#login input[type=text], #login input[type=password] {border:none;background:white;color:black;width:103px;height: 23px;line-height:23px;float:left;margin-right:1px;}
+#login input[type=submit] {border:none;background:#175487;width: 65px; height: 23px;line-height:23px;color:white;}
+#login input.blur {color:#999;}
+
+#login a {
+    font-size: 11px;
+    color: white;
 }
-#footer a[href] { color: gold; text-decoration: none }
-#footer a[href]:hover { background: transparent; color: gold }
 
+#registration {display:block; float: left; margin: 4px 0 0 7px;}
+#forgot_password {display:block; margin: 4px 0 0 130px;}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * articles
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#navbar {
+    height: 36px;
+    background: #256aa3;
+    padding: 0 150px;
+}
 
-.content { margin: 1em 0 1em 0; }
+#navbar ul {
+    list-style: none; list-style-position: outside;
+}
 
-.textarea { padding: 1em 0 1em 0;}
-.textarea textarea { width: 100%; }
+#navbar ul li {
+    float: left;
+    line-height: 36px;
+    padding: 0 12px;
+}
 
-.top { color: #ccc }
-.top a:link, .top a:visited { color: #999 }
+#navbar ul li a {
+    color: white;
+    text-decoration: none;
+    /*font-weight: bold;*/
+    font-size: 16px;
+}
 
-.top li { display: inline; list-style-type: none; list-style-position: outside; list-style-image: none }
+#navbar ul li.active a {
+    color: #ffd700;
+}
 
-#login { font-size: 80%; text-align: right; margin-bottom: 0.5em }
+#navbar ul li:hover {
+    background: #175487;
+}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * user
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#search {
+    width: 313px;
+    height: 23px;
+    float: right;
+    border: 1px solid #175487;
+    margin-top: 5px;
+}
 
-.info {color: gray; font-size: 80%;}
+#search input {margin:0;padding:0 10px;}
+#search input[type=text] {border:none;background:white;color:black;width:228px;height: 23px;line-height:23px;float:left;}
+#search input[type=submit] {border:none;background:#175487;width: 65px; height: 23px;line-height:23px;color:white;}
 
-.login-form {
-    padding: 2px;
-    font-size: 90%;
+#content {
+    padding: 20px 150px 0;
+    background: url(../img/contentbg.png) top left repeat-x transparent;
+    font-size: 15px;
+    line-height: 22px;
+}
+
+#content h1 {
+    padding: 30px 0 20px 0;
+    font-size: 30px;
     font-weight: normal;
-
-    /*border: 1px solid #D0D0D0;*/
-
-    display: table;
+    color: #256aa3;
 }
 
-.login-form > table {
-    padding: 10px;
+#content h2 {
+    padding: 20px 0 10px 0;
+    font-size: 26px;
+    font-weight: normal;
+    font-style: oblique;
+    color: #256aa3;
 }
 
-.login-form tr > td:first-child {
-
-    font-weight: bold;
-    vertical-align: top;
-    width: auto;
+#content li {
+    margin-left: 40px;
 }
 
-.login-form > table td {
-    padding-right: 5px;
-    padding-top: 3px;
+#content .code {
+    background: #cfe7fb;
+    padding: 30px 40px;
 }
 
-.register-form {
-    border: 1px solid #d0d0d0;
-    display: table;
-
-    padding-top: 30px;
-    padding-bottom: 30px;
-    padding-left: 10px;
-    padding-right: 20px;
+#content a {
+    color: #0077bb;
 }
 
-.register-form td {
-    padding-bottom: 20px;
+#content a.hyperspec {
+    color: #4040f2;
 }
 
-.register-form tr > td:first-child {
-    vertical-align: top;
-    font-weight: bold;
-    font-size: 90%;
-    
+#footer {
+    height: 53px;
+    line-height: 53px;
+    background: #256aa3;
+    margin: 20px 0;
+    padding: 0 25px;
+    font-size: 16px;
 }
 
-
-
-.register-form input[type=button] {
-    margin-top: 10px;
+#footer a {
+    color: #ffd700;
 }
 
-.error-info {
-    color: red;
-    font-size: 80%;
+#footer .separator {
+    padding: 0 15px;
+    color: white;
 }
 
-
-/* search page */
-
-.search-results {
-    margin-top: 0.4em;
-    margin-left: 1em;
-    margin-right: 1em;
-    border-top: 1px solid #B9B2CA;
-}
-
-.search-results a {
-    font-size: 120%;
-}
-
-.search-results > div {
-//    padding-top: 0.6em;
-    margin-bottom: 0.3em;
-    border-bottom: 1px solid #B9B2CA;
-}
-
-#search-form {
-    margin: 1em;
-}
