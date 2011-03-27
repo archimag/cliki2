@@ -211,10 +211,7 @@
                     :query query
                     :start start
                     :total total
-                    :href-after (if (> start 0)
-                                    (url (max (- start *search-page-number-results*) 0)))
-                    :href-before (if (> (- total start) *search-page-number-results*)
-                                     (url (+ start *search-page-number-results*)))
+                    :page-size *search-page-number-results*
                     :articles (iter (for (article . score) in articles)
                                     (collect (list* :score score
                                                     (article-short-info article)))))))

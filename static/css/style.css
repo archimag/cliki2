@@ -99,6 +99,28 @@
 #search input[type=text] {border:none;background:white;color:black;width:228px;height: 23px;line-height:23px;float:left;}
 #search input[type=submit] {border:none;background:#175487;width: 65px; height: 23px;line-height:23px;color:white;}
 
+#paginator {
+    padding: 16px;
+    margin: 20px 0;
+    color: #333;
+    background: #eee;
+}
+
+#paginator span {float:left;font-style:oblique;}
+
+#paginator ul {
+    list-style: none;
+    list-style-position: outside;
+    margin-left: 105px;
+}
+
+#paginator ul li {
+    margin: 0 !important;
+    display: block;
+    float: left;
+    width: 36px;
+}
+
 #content {
     padding: 20px 150px 0;
     background: url(../img/contentbg.png) top left repeat-x transparent;
@@ -155,4 +177,6 @@
     padding: 0 15px;
     color: white;
 }
+
+.clear {clear:both;}
 
