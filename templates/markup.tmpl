@@ -7,11 +7,11 @@
 {/template}
 
 {template person-link}
-    <a href="{$href}">{$name}</a>
+    <a href="{$href}" class="person">{$name}</a>
 {/template}
 
 {template hyperspec-link}
-    <a href="{$href}">{$symbol}</a>
+    <a href="{$href}" class="hyperspec">{$symbol}</a>
 {/template}
 
 {template code-block}
@@ -21,7 +21,7 @@
 {/template}
 
 {template category-link}
-    <a href="{$href}">{$title}</a>
+    <a href="{$href}" class="category">{$title}</a>
 {/template}
 
 {template category-content}
@@ -33,3 +33,4 @@
         {/foreach}
     </ul>
 {/template}
+
