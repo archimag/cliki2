@@ -2,31 +2,32 @@
 
 (in-package #:cliki2.markup)
 
-(defvar *cliki2-rules* (alexandria:copy-hash-table esrap::*rules*))
+(defvar *cliki2-rules* (alexandria:copy-hash-table *rules*))
+
+(defvar *cliki2-compiled-grammar* nil)
 
 (defmacro with-cliki2-rules (&body body)
-  `(let ((esrap::*rules* *cliki2-rules*))
+  `(let ((*rules* *cliki2-rules*))
      ,@body))
+
+(defun recompile-cliki2-grammar ()
+  (setf *cliki2-compiled-grammar*
+        (esrap:compile-grammar '3bmd-grammar::block)))
 
 (defmacro define-rule (symbol expression &body options)
   `(with-cliki2-rules
      (defrule ,symbol ,expression ,@options)))
 
-(defun parse-cliki2-markup (symbol text &key (start 0) end junk-allowed)
-  (with-cliki2-rules
-    (parse symbol text
-           :start start
-           :end end
-           :junk-allowed junk-allowed)))
-
-
 (defun parse-cliki2-doc (markup &aux (curpos 0))
-  (iter (multiple-value-bind (block pos)
-            (parse-cliki2-markup '3bmd-grammar::block markup :start curpos :junk-allowed t)
-          (while block)
-          (collect block)
-          (while pos)
-          (setf curpos pos))))
+  (with-cliki2-rules
+    (unless *cliki2-compiled-grammar*
+      (recompile-cliki2-grammar))
+    (iter (multiple-value-bind (block pos)
+              (parse *cliki2-compiled-grammar* markup :start curpos :junk-allowed t)
+            (while block)
+            (collect block)
+            (while pos)
+            (setf curpos pos)))))
 
 (defun generate-html-from-markup (markup)
   (let ((input (3bmd::expand-tabs markup :add-newlines t)))
@@ -43,7 +44,7 @@
     (declare (ignore start end))
     (cons :article-link (cliki2:normalize-name (concat article)))))
 
-(defmethod 3bmd::print-tagged-element ((tag (eql :article-link)) stream title)
+(defmethod 3bmd:print-tagged-element ((tag (eql :article-link)) stream title)
   (write-string (cliki2.view:article-link
                  (list :title title
                        :href (restas:genurl 'cliki2:view-article :title title)))
@@ -54,7 +55,7 @@
     (declare (ignore start end))
     (cons :person-link (cliki2:normalize-name (concat name)))))
 
-(defmethod 3bmd::print-tagged-element ((tag (eql :person-link)) stream name)
+(defmethod 3bmd:print-tagged-element ((tag (eql :person-link)) stream name)
   (write-string (cliki2.view:person-link
                  (list :name name
                        :href (restas:genurl 'cliki2:view-person :name name)))
@@ -65,7 +66,7 @@
     (declare (ignore start end))
     (cons :hyperspec-link (concat symbol))))
 
-(defmethod 3bmd::print-tagged-element ((tag (eql :hyperspec-link)) stream symbol)
+(defmethod 3bmd:print-tagged-element ((tag (eql :hyperspec-link)) stream symbol)
   (write-string (cliki2.view:hyperspec-link
                  (list :symbol symbol
                        :href (clhs-lookup:spec-lookup symbol)))
@@ -75,15 +76,6 @@
   (:destructure (start category end)
     (declare (ignore start end))
     (cons :article-link (cliki2:normalize-name (concat category)))))
-
-(define-rule 3bmd-grammar::link
-    (or 3bmd-grammar::explicit-link
-        3bmd-grammar::reference-link
-        3bmd-grammar::auto-link
-        article-link
-        person-link
-        hyperspec-link
-        category-link))
 
 (define-rule empty-lines
     (* (and (* (or #\Space #\Tab)) (? #\Return) #\Newline)))
@@ -97,15 +89,11 @@
     (declare (ignore start w1 w2 end))
     (cons :lisp-code-block (concat code))))
 
-(defmethod 3bmd::print-tagged-element ((tag (eql :lisp-code-block)) stream code)
+(defmethod 3bmd:print-tagged-element ((tag (eql :lisp-code-block)) stream code)
   (write-string (cliki2.view:code-block
                  (list :code (colorize::html-colorization :common-lisp code)))
                 stream))
   
-(define-rule 3bmdcode (or 3bmd-grammar::code1 3bmd-grammar::code2 3bmd-grammar::code3 3bmd-grammar::code4 3bmd-grammar::code5)
-  (:lambda (a)
-    (list :code a)))
-
 (defun category-char-p (character)
   (not (member character '(#\: #\" #\)))))
 
@@ -121,7 +109,7 @@
     (cons :cliki2-category-list (cliki2:category-keyword (second list)))))
 
 
-(defmethod 3bmd::print-tagged-element ((tag (eql :cliki2-category-list)) stream category)
+(defmethod 3bmd:print-tagged-element ((tag (eql :cliki2-category-list)) stream category)
   (write-string (cliki2.view:category-content
                  (list :items
                        (iter (for article in (cliki2::articles-with-category category))
@@ -131,4 +119,10 @@
                                                             :title (cliki2::article-title article)))))))
                 stream))
 
-(define-rule 3bmd-grammar::code (or 3bmdcode code-block category-list))
+(define-rule 3bmd-grammar:inline-extensions
+    (or article-link
+        person-link
+        hyperspec-link
+        category-link
+        code-block
+        category-list))
