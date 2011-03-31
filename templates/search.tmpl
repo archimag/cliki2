@@ -37,6 +37,10 @@
                             <a href="{$article.href}">
                                 {$article.title}
                             </a>
+                            <div>
+                                {$article.head |noAutoescape}
+                            </div>
+                            /*
                             <div class="info">
                                 <strong>Score:</strong>
                                 {$article.score} <br />
@@ -53,6 +57,7 @@
                                 <strong>Changed:</strong>
                                 {$article.changed}
                             </div>
+                            */
                         </div>
                     {/foreach}
                 </div>
