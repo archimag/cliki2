@@ -45,18 +45,22 @@
 
 
 (defun revision-summary-list (revisions)
-  (loop for revision in revisions collect
-       (let ((title (article-title (revision-article revision))))
-         (list :href (restas:gen-full-url 'view-article-revision
-                                          :title title
-                                          :mark (revision-content-sha1 revision))
-               :date (hunchentoot:rfc-1123-date (revision-date revision))
-               :author (let ((name (user-name (revision-author revision))))
-                         (list :name name
-                               :href (restas:genurl 'view-person
-                                                    :name name)))
-               :title title
-               :summary (revision-summary revision)))))
+  (flet ((format-time (universal-time)
+           (apply #'format nil
+                  "~D-~2,'0D-~2,'0D ~2,'0D:~2,'0D"
+                  (reverse (subseq (multiple-value-list (decode-universal-time universal-time)) 1 6)))))
+    (loop for revision in revisions collect
+         (let ((title (article-title (revision-article revision))))
+           (list :href (restas:gen-full-url 'view-article-revision
+                                            :title title
+                                            :mark (revision-content-sha1 revision))
+                 :date (format-time (revision-date revision))
+                 :author (let ((name (user-name (revision-author revision))))
+                           (list :name name
+                                 :href (restas:genurl 'view-person
+                                                      :name name)))
+                 :title title
+                 :summary (revision-summary revision))))))
 
 ;; article
 
@@ -195,6 +199,7 @@
   (list :href (restas:genurl 'view-article
                              :title (article-title article))
         :title (article-title article)
+        :head (sanitize:clean (cliki2.markup:format-article-description article))
         :labels (mapcar #'string-downcase (article-category-list article))
         :changed (hunchentoot:rfc-1123-date (revision-date (article-latest-revision article)))))
 

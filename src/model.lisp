@@ -128,6 +128,14 @@
                   (cons latest-revision content)))
           content))))
 
+(defun article-content-head (article &aux (count 200))
+  (let* ((revision (article-latest-revision article))
+         (path (content-path article (revision-content-sha1 revision))))
+    (with-output-to-string (out)
+      (iter (for char in-file path using #'read-char)
+            (for i from 0 below count)
+            (write-char char out)))))
+            
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; revision
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
