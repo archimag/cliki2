@@ -29,6 +29,8 @@
         {foreach $item in $items}
             <li>
                 <a href="{$item.href}">{$item.title}</a>
+                -
+                {$item.head |noAutoescape}
             </li>
         {/foreach}
     </ul>

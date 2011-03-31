@@ -120,15 +120,42 @@
   (:lambda (list)
     (cons :cliki2-category-list (cliki2:category-keyword (second list)))))
 
+(sanitize:define-sanitize-mode +simple+
+    :elements ("a")
+    :attributes (("a" . ("href")))
+    :protocols  (("a" . (("href" . (:ftp :http :https :mailto :relative))))))
+
+(defun format-article-description (article)
+  (sanitize:with-clean-fragment (fragment
+                                 (with-output-to-string (s)
+                                   (let ((3bmd::*references* (make-hash-table)))
+                                     (3bmd::print-element (parse '3bmd-grammar::block  
+                                                                 (cliki2::article-content-head article)
+                                                                 :junk-allowed t)
+                                                          s)))
+                                 +simple+)
+    (with-output-to-string (out)
+      (iter (for item in-child-nodes fragment)
+            (for text = (html:serialize-html item :to-string))
+            (for len initially 0 then (+ len (length text)))
+            (let ((dot-pos (if (xtree:text-p item) (position #\. text))))
+              (cond
+                (dot-pos (write-string (subseq text 0 (1+ dot-pos)) out)
+                         (finish))
+                (t (write-string text out))))))))
 
 (defmethod 3bmd::print-tagged-element ((tag (eql :cliki2-category-list)) stream category)
   (write-string (cliki2.view:category-content
                  (list :items
-                       (iter (for article in (cliki2::articles-with-category category))
+                       (iter (for article in (sort (copy-list (cliki2::articles-with-category category))
+                                                   #'string<
+                                                   :key 'cliki2::article-title))
                              (collect
                                  (list :title (cliki2::article-title article)
+                                       :head (format-article-description article)
                                        :href (restas:genurl 'cliki2:view-article
                                                             :title (cliki2::article-title article)))))))
                 stream))
+
 
 (define-rule 3bmd-grammar::code (or 3bmdcode code-block category-list))
