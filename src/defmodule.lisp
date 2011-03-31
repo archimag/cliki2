@@ -4,7 +4,8 @@
 
 (defpackage #:cliki2.markup
   (:use #:cl #:iter #:esrap)
-  (:export #:generate-html-from-markup))
+  (:export #:generate-html-from-markup
+           #:format-article-description))
 
 (restas:define-module #:cliki2
   (:use #:cl #:iter #:bknr.datastore #:bknr.indices #:cliki2.markup)
@@ -68,7 +69,7 @@
 
   (restas:with-context context
     (setf (restas:context-symbol-value context '*user-auth-cipher*)
-          (ironclad:make-cipher :blowfish 
+          (ironclad:make-cipher :blowfish
                                 :mode :ecb
                                 :key (restas:context-symbol-value context '*cookie-cipher-key*)))
 
