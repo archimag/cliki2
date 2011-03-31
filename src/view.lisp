@@ -199,6 +199,7 @@
   (list :href (restas:genurl 'view-article
                              :title (article-title article))
         :title (article-title article)
+        :head (sanitize:clean (cliki2.markup:format-article-description article))
         :labels (mapcar #'string-downcase (article-category-list article))
         :changed (hunchentoot:rfc-1123-date (revision-date (article-latest-revision article)))))
 
