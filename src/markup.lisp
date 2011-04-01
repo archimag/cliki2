@@ -149,7 +149,7 @@
                  (list :items
                        (iter (for article in (sort (copy-list (cliki2::articles-with-category category))
                                                    #'string<
-                                                   :key 'cliki2::article-title))
+                                                   :key 'cliki2::article-downcase-title))
                              (collect
                                  (list :title (cliki2::article-title article)
                                        :head (format-article-description article)
