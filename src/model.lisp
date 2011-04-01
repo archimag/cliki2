@@ -143,7 +143,7 @@
 
 (defun article-content-head (article &aux (count 200))
   (let* ((revision (article-latest-revision article))
-         (path (content-path article (revision-content-sha1 revision))))
+         (path (content-path article (revision-date revision))))
     (with-output-to-string (out)
       (iter (for char in-file path using #'read-char)
             (for i from 0 below count)
@@ -163,31 +163,20 @@
    (date         :initarg   :date
                  :reader    revision-date)
    (summary      :initarg   :summary
-                 :reader    revision-summary)
-   (content-sha1 :initarg   :content-sha1
-                 :reader    revision-content-sha1))
+                 :reader    revision-summary))
   (:metaclass persistent-class))
 
-(defun content-path (article content-sha1)
-  (merge-pathnames (make-pathname :directory `(:relative
-                                               "content"
-                                               ,(closure-template:encode-uri-component (article-title article))
-                                               ,content-sha1)
-                                  :name content-sha1)
+(defun content-path (article date)
+  (merge-pathnames (make-pathname :directory (list :relative
+                                                   "content"
+                                                   (closure-template:encode-uri-component (article-title article)))
+                                  :name (write-to-string date))
                    *datadir*))
-
-(defun save-content (article content)
-  (let* ((octets (babel:string-to-octets content :encoding :utf-8))
-         (sha1 (ironclad:byte-array-to-hex-string (ironclad:digest-sequence :sha1 octets))))
-    (alexandria:write-byte-vector-into-file octets
-                                            (ensure-directories-exist (content-path article sha1))
-                                            :if-exists :supersede
-                                            :if-does-not-exist :create)
-    sha1))
 
 (defun revision-content (revision)
   (alexandria:read-file-into-string
-   (content-path (revision-article revision) (revision-content-sha1 revision))))
+   (content-path (revision-article revision)
+                 (revision-date revision))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; changes
@@ -209,15 +198,21 @@
                      (author-ip (hunchentoot:real-remote-addr))
                      (date (get-universal-time))
                      (add-to-index t))
+  
+  (alexandria:write-string-into-file content
+                                     (ensure-directories-exist (content-path article date))
+                                     :if-exists :supersede
+                                     :if-does-not-exist :create)
+                                     
   (add-revision-txn article
                     (make-instance 'revision
                                    :article article
                                    :author author
                                    :author-ip author-ip
                                    :date date
-                                   :summary summary
-                                   :content-sha1 (save-content article content))
+                                   :summary summary)
                     (content-categories content))
+  
   (when add-to-index
     (add-article-to-index (article-title article)
                           content)))
