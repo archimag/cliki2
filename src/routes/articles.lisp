@@ -52,12 +52,12 @@
   (list :article-history-page
         :article (check-article title)))
 
-(restas:define-route view-article-revision ("history/:title/:mark")
+(restas:define-route view-article-revision ("history/:title/:date"
+                                            :parse-vars (list :date #'parse-integer))
   (let ((article (check-article title)))
     (list :article-revision-page
           :article article
-          :revision (find mark
+          :revision (find date
                           (article-revisions article)
-                          :key #'revision-content-sha1
-                          :test #'string=))))
+                          :key #'revision-date))))
 
