@@ -4,9 +4,22 @@
 
 ;;;; search index
 
-(defparameter *search-index*
-  (make-instance 'montezuma:index
-                 :path #P"/var/cliki2/index"))
+(defparameter *search-index* nil)
+
+(defun close-search-index ()
+  (when *search-index*
+    (montezuma:close *search-index*)
+    (setf *search-index* nil)))
+
+
+(defun open-search-index (&aux (dir (merge-pathnames "index/" *datadir*)))
+  (close-search-index)
+  (ensure-directories-exist dir)
+  (setf *search-index*
+        (make-instance 'montezuma:index
+                       :path dir)))
+
+(open-search-index)
 
 (defun add-article-to-index (title content)
   (let ((doc (montezuma:get-document *search-index*
@@ -42,9 +55,8 @@
   (:metaclass persistent-class))
 
 (defun user-info-pathname (user)
-  (merge-pathnames (format nil
-                           "person/~A"
-                           (hunchentoot:url-encode (user-name user)))
+  (merge-pathnames (make-pathname :directory '(:relative "person")
+                                  :name user)
                    *datadir*))
 
 (defun user-info (user &aux (path (user-info-pathname user)))
@@ -92,7 +104,8 @@
           :reader article-title)
    (downcase-title :index-type string-unique-index
                    :index-reader article-with-downcase-title
-                   :index-values all-articles)
+                   :index-values all-articles
+                   :reader article-downcase-title)
    (revisions :initarg :revisions
               :initform nil
               :accessor article-revisions)
@@ -156,11 +169,12 @@
   (:metaclass persistent-class))
 
 (defun content-path (article content-sha1)
-  (merge-pathnames
-   (format nil "content/~A/~A"
-           (remove-if-not #'alphanumericp (article-title article))
-           content-sha1)
-   *datadir*))
+  (merge-pathnames (make-pathname :directory `(:relative
+                                               "content"
+                                               ,(closure-template:encode-uri-component (article-title article))
+                                               ,content-sha1)
+                                  :name content-sha1)
+                   *datadir*))
 
 (defun save-content (article content)
   (let* ((octets (babel:string-to-octets content :encoding :utf-8))
