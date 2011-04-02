@@ -1,5 +1,3 @@
-* Keep CamelCased article titles on import
-* Set modified time of import revisions on disk to be same as time of original files (useful for recovery in case of metadata loss)
 * Mediawiki-style diffs
 * User and IP blacklists
 * Allow anonymous edits
