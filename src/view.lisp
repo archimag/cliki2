@@ -2,6 +2,7 @@
 
 (in-package #:cliki2)
 
+(defgeneric apply-template (drawer template &rest args &key &allow-other-keys))
 (defgeneric render-key-data (drawer pagetype &rest args &key &allow-other-keys))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10,7 +11,7 @@
 
 (defclass drawer () ())
 
-(defun apply-template (drawer template &rest args &key &allow-other-keys)
+(defmethod apply-template ((drawer drawer) template &rest args &key &allow-other-keys)
   (funcall template
    (concatenate 'list
                 args
