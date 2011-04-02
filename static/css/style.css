@@ -189,3 +189,4 @@
 
 .clear {clear:both;}
 
+pre, pre *, .code, .code * { font-family: monospace; }
