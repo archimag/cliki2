@@ -39,6 +39,8 @@
 ;;; cliki2 markup extensions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;; article-link
+
 (define-rule article-link (and (and (? #\\) "_(") (+ (and (! #\)) character)) #\))
   (:destructure (start article end)
     (declare (ignore start end))
@@ -51,6 +53,8 @@
                        :href (restas:genurl 'cliki2:view-article :title title)))
                 stream))
 
+;;;; person-link
+
 (define-rule person-link (and "_P(" (+ (and (! #\)) character)) #\))
   (:destructure (start name end)
     (declare (ignore start end))
@@ -61,6 +65,8 @@
                  (list :name name
                        :href (restas:genurl 'cliki2:view-person :name name)))
                 stream))
+
+;;;; hyperspec-link
 
 (define-rule hyperspec-link (and "_H(" (+ (and (! #\)) character)) #\))
   (:destructure (start symbol end)
@@ -73,10 +79,14 @@
                        :href (clhs-lookup:spec-lookup symbol)))
                 stream))
 
+;;;; category-link
+
 (define-rule category-link (and (and (? #\\) "*(") (+ (and (! #\)) character)) #\))
   (:destructure (start category end)
     (declare (ignore start end))
     (cons :article-link (cliki2:normalize-name (concat category)))))
+
+;;;; code-block
 
 (define-rule empty-lines
     (* (and (* (or #\Space #\Tab)) (? #\Return) #\Newline)))
@@ -94,6 +104,8 @@
   (write-string (cliki2.view:code-block
                  (list :code (colorize::html-colorization :common-lisp code)))
                 stream))
+
+;;;; category-list
   
 (defun category-char-p (character)
   (not (member character '(#\: #\" #\)))))
@@ -146,6 +158,18 @@
                                                             :title (cliki2::article-title article)))))))
                 stream))
 
+;;;; package-link
+
+(define-rule package-link (and ":(package" (+ (or #\Tab #\Space #\Newline #\Return)) "\"" (+ (and (! #\") character)) "\")")
+  (:destructure (start w1 quote link end)
+    (declare (ignore start w1 quote end))
+    (cons :package-link (concat link))))
+
+(defmethod 3bmd:print-tagged-element ((tag (eql :package-link)) stream link)
+  (write-string (cliki2.view:package-link (list :href link))
+                stream))
+
+;;;; cliki2 markup extensions
 
 (define-rule 3bmd-grammar:inline-extensions
     (or article-link
@@ -153,4 +177,5 @@
         hyperspec-link
         category-link
         code-block
-        category-list))
+        category-list
+        package-link))

@@ -156,18 +156,10 @@
     margin: 15px 0;
 }
 
-#content a.internal {
-    color: #0077bb;
-}
-
-#content a.new {
-    color: #BA0000;
-}
-
-
-#content a.hyperspec {
-    color: #4040f2;
-}
+#content a.internal { color: #0077bb; }
+#content a.new { color: #BA0000; }
+#content a.hyperspec { color: #4040f2;}
+#content a.download { color: #00E; font-weight: bold; }
 
 #footer {
     height: 53px;
