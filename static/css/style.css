@@ -156,9 +156,14 @@
     margin: 15px 0;
 }
 
-#content a {
+#content a.internal {
     color: #0077bb;
 }
+
+#content a.new {
+    color: #BA0000;
+}
+
 
 #content a.hyperspec {
     color: #4040f2;

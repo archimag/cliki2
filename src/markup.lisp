@@ -47,6 +47,7 @@
 (defmethod 3bmd:print-tagged-element ((tag (eql :article-link)) stream title)
   (write-string (cliki2.view:article-link
                  (list :title title
+                       :new (null (cliki2::article-with-downcase-title (string-downcase title)))
                        :href (restas:genurl 'cliki2:view-article :title title)))
                 stream))
 
@@ -110,7 +111,7 @@
 
 (sanitize:define-sanitize-mode +simple+
     :elements ("a")
-    :attributes (("a" . ("href")))
+    :attributes (("a" . ("href" "class")))
     :protocols  (("a" . (("href" . (:ftp :http :https :mailto :relative))))))
 
 (defun format-article-description (article)

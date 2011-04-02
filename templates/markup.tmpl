@@ -3,7 +3,7 @@
 {namespace cliki2.view}
 
 {template article-link}
-    <a href="{$href}">{$title}</a>
+    <a href="{$href}" class="{$new ? 'new' : 'internal'}">{$title}</a>
 {/template}
 
 {template person-link}
@@ -28,7 +28,7 @@
     <ul>
         {foreach $item in $items}
             <li>
-                <a href="{$item.href}">{$item.title}</a>
+                {call article-link data="$item" /}
                 -
                 {$item.head |noAutoescape}
             </li>
