@@ -166,17 +166,18 @@
     line-height: 53px;
     background: #256aa3;
     margin: 20px 0;
-    padding: 0 25px;
     font-size: 16px;
 }
 
-#footer a {
+#footer > a {
     color: #ffd700;
+    padding: 0 15px;
+    border-left: 1px solid white;
 }
 
-#footer .separator {
-    padding: 0 15px;
-    color: white;
+#footer > a:first-child {
+    padding-left: 25px;
+    border-left: none;
 }
 
 .clear {clear:both;}

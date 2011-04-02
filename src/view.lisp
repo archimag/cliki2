@@ -28,7 +28,7 @@
 (defun article-action-list (article mode)
   (let ((title (article-title article)))
     (case mode
-      (:view (list :edit (restas:genurl 'edit-article :title title)
+      (:view (list :edit (if *user* (restas:genurl 'edit-article :title title))
                    :raw (restas:genurl 'view-article-source :title title)
                    :history (restas:genurl 'view-article-history :title title)))
       (:history (list :view (restas:genurl 'view-article :title title)))
