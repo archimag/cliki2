@@ -11,7 +11,8 @@
   (:use #:cl #:iter #:bknr.datastore #:bknr.indices #:cliki2.markup)
   (:export #:view-article #:view-person
            #:normalize-name
-           #:category-keyword))
+           #:category-keyword
+           #:init-recent-revisions))
 
 (in-package #:cliki2)
 
@@ -75,6 +76,7 @@
 
     (let ((*store* nil))
       (open-store (merge-pathnames "store/" *datadir*))
+      (init-recent-revisions)
       (setf (restas:context-symbol-value context '*store*)
             *store*))))
 

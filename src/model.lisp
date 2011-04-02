@@ -186,6 +186,10 @@
 (defvar *recent-revisions-latest* 0)
 (defvar *recent-revisions-lock* (bt:make-lock))
 
+(defun init-recent-revisions ()
+  (replace *recent-revisions* (sort (store-objects-with-class 'revision) #'> :key #'revision-date))
+  (setf *recent-revisions-latest* 0))
+
 (defun get-recent-revisions ()
   (bt:with-lock-held (*recent-revisions-lock*)
     (let ((l (length *recent-revisions*)))

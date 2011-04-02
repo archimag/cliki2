@@ -94,10 +94,6 @@
                               :date (+ (incf timestamp-skew) (file-write-date file))
                               :add-to-index nil))
               (add-article-to-index article-title content)))))
-    
-  ;; fix up recent revisions (this will get blown away on store reload, but doesn't matter because all revisions made after import will be correct)
-  (replace *recent-revisions* (sort (store-objects-with-class 'revision) #'> :key #'revision-date))
-  (setf *recent-revisions-latest* 0)
   (bknr.datastore:snapshot))
 
 ;; (load-old-articles "/home/viper/tmp/cliki/")
