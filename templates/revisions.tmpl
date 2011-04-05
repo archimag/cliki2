@@ -48,16 +48,45 @@
         {param title: 'History of article: ' + $title /}
         {param user: $user /}
         {param body}
-            <ul>
-                {foreach $revision in $revisions}
-                    <li>
-                        <a href="{$revision.href}">{$revision.date}</a>
-                        {$revision.summary}
-                        <a href="{$revision.author.href}">{$revision.author.name}</a>
-                    </li>
-                {/foreach}
-            </ul>
+            <form method="post">
+                <input type="submit" value="Compare selected versions" />
+                <ul id="pagehistory">
+                    {foreach $revision in $revisions}
+                        <li>
+                            <input type="radio" value="{$revision.href}" name="old" />
+                            <input type="radio" value="{$revision.href}" name="diff" />
+                            <a href="{$revision.href}">{$revision.date}</a>
+                            {$revision.summary}
+                            <a href="{$revision.author.href}">{$revision.author.name}</a>
+                        </li>
+                    {/foreach}
+                </ul>
+            </form>
             {call article-action-links data="$links" /}
+        {/param}
+    {/call}
+{/template}
+
+{template view-revisions-diff}
+    {call base}
+        {param title: 'Diff' /}
+        {param user: $user /}
+        {param body}
+            <table id="diff">
+                <tbody>
+                    <tr>
+                        <td>
+                            {$left |noAutoescape}
+                        </td>
+
+                        <td>
+                            {$right |noAutoescape}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {call article-action-links data="$links" /}            
         {/param}
     {/call}
 {/template}

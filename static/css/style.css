@@ -183,3 +183,15 @@
 .clear {clear:both;}
 
 pre, pre *, .code, .code * { font-family: monospace; }
+
+#pagehistory {
+    list-style-type: square;
+    margin: .3em 0 0 1.5em;
+    /*margin: 0;*/
+    padding: 0;
+}
+
+#pagehistory li { margin: 0; padding: 0; line-height: 30px; }
+
+#diff td { vertical-align: top; }
+#diff span { color: red; }

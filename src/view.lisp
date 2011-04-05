@@ -28,13 +28,17 @@
 (defun article-action-list (article mode)
   (let ((title (article-title article)))
     (case mode
-      (:view (list :edit (if *user* (restas:genurl 'edit-article :title title))
-                   :raw (restas:genurl 'view-article-source :title title)
-                   :history (restas:genurl 'view-article-history :title title)))
-      (:history (list :view (restas:genurl 'view-article :title title)))
+      (:view
+       (list :edit (if *user* (restas:genurl 'edit-article :title title))
+             :raw (restas:genurl 'view-article-source :title title)
+             :history (restas:genurl 'view-article-history :title title)))
+      
+      (:history
+       (list :view (restas:genurl 'view-article :title title)))
 
-      (:revision (list :view (restas:genurl 'view-article :title title)
-                       :history (restas:genurl 'view-article-history :title title))))))
+      ((:revision :diff)
+       (list :view (restas:genurl 'view-article :title title)
+             :history (restas:genurl 'view-article-history :title title))))))
 
 
 (defun render-article-revision (drawer article revision mode)
@@ -116,6 +120,37 @@
                   :title (format nil "History of page \"~A\"" (article-title article))
                   :revisions (revision-summary-list (article-revisions article))
                   :links (article-action-list article :history)))
+
+;;; revisions-diff-page
+
+(defun format-diff-part (vector flag)
+  (with-output-to-string (out)
+    (iter (for item in-vector vector)
+          (with tag = nil)
+
+          (when (and tag
+                     (not (eql (car item) flag)))
+            (setf tag nil)
+            (write-string "</span>"  out))
+
+          (when (and (not tag)
+                     (eql (car item) flag))
+            (setf tag t)
+            (write-string "<span>" out))
+
+          (when (or (eql (car item) :lcs)
+                    (eql (car item) flag))
+            (write-char (cdr item) out)))))
+
+
+(defmethod render-key-data ((drawer drawer) (type (eql :revisions-diff-page))
+                            &key article new old)
+  (let ((diff (com.gigamonkeys.prose-diff::diff-vectors old new)))
+    (apply-template drawer
+                    'cliki2.view:view-revisions-diff
+                    :left (format-diff-part diff :delete)
+                    :right (format-diff-part diff :add)
+                    :links (article-action-list article :diff))))
 
 ;; article-revision-page
 

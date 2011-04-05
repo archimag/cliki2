@@ -10,7 +10,8 @@
                  #:cl-recaptcha
                  #:3bmd
                  #:montezuma
-                 #:sanitize)
+                 #:sanitize
+                 #:com.gigamonkeys.prose-diff)
     :components
     ((:module "src"
               :components
