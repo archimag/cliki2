@@ -14,11 +14,12 @@
                                    :method :post
                                    :requirement 'not-sign-in-p)
   (let* ((name (hunchentoot:post-parameter "name"))
-         (password (password-cache (hunchentoot:post-parameter "password")))
-         (done (hunchentoot:get-parameter "done"))
-         (user (user-with-name name)))
+         (user (user-with-name name))
+         (password (password-digest (hunchentoot:post-parameter "password")
+                                    (user-password-salt user)))
+         (done (hunchentoot:get-parameter "done")))
     (cond
-      ((and user (string= (user-password user) password))
+      ((and user (string= (user-password-digest user) password))
        (run-sing-in user)
        (restas:redirect (or done "/")))
       (t (restas:redirect 'sign-in)))))
@@ -93,16 +94,21 @@
                           :password password
                           :re-password (form-field-value "re-password")
                           fails)))
-      (t (let ((invite (with-transaction ()
-                         (make-instance 'invite
-                                        :user (make-instance 'user
-                                                             :name nickname
-                                                             :email email
-                                                             :password (password-cache password)
-                                                             :role :invite))))
+      (t (let ((invite
+                (let* ((salt (make-random-salt))
+                       (digest (password-digest password salt)))
+                  (with-transaction ()
+                    (make-instance 'invite
+                                   :user (make-instance
+                                          'user
+                                          :name nickname
+                                          :email email
+                                          :password-salt salt
+                                          :password-digest digest
+                                          :role :invite)))))
                (to (list email)))
            (sendmail to
-                     (cliki2.view:confirmation-mail 
+                     (cliki2.view:confirmation-mail
                       (list :to to
                             :noreply-mail *noreply-email*
                             :subject (prepare-subject "Потверждение регистрации")

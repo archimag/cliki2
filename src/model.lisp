@@ -36,23 +36,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass user (store-object)
-  ((name :initarg :name
-         :index-type string-unique-index
-         :index-reader user-with-name
-         :index-values all-users
-         :reader user-name)
-   (email :initarg :email
-          :index-type string-unique-index
-          :index-reader user-with-email
-          :reader user-email)
-   (role :initarg :role
-         :initform nil
-         :accessor user-role)
-   (salt :initform nil
-         :accessor user-password-salt) ;; FIXME
-   (password :initarg :password
-             :accessor user-password)) ;; hash this PROPERLY
-  (:metaclass persistent-class))
+  ((name            :initarg       :name
+                    :index-type    string-unique-index
+                    :index-reader  user-with-name
+                    :index-values  all-users
+                    :reader        user-name)
+   (email           :initarg       :email
+                    :index-type    string-unique-index
+                    :index-reader  user-with-email
+                    :reader        user-email)
+   (role            :initarg       :role
+                    :accessor      user-role)
+   (password-salt   :initarg       :password-salt
+                    :accessor      user-password-salt)
+   (password-digest :initarg       :password-digest
+                    :accessor      user-password-digest))
+  (:metaclass persistent-class)
+  (:default-initargs :role nil))
 
 (defun user-info-pathname (user)
   (merge-pathnames (make-pathname :directory '(:relative "person")
@@ -90,10 +90,9 @@
          (ironclad:digest-sequence :sha1
                                    (babel:string-to-octets
                                     (format nil
-                                            "~A~A~A"
+                                            "~A~A"
                                             (user-name user)
-                                            (user-email user)
-                                            (user-password user)))))))
+                                            (user-email user)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; article

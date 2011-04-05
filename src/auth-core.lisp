@@ -12,8 +12,7 @@
 (defun encrypt-auth-cookie (name password &key (version 1) (date (get-universal-time)))
   (let ((result (ironclad:ascii-string-to-byte-array
                  (pack-auth-cookie name password :version version :date date))))
-    (ironclad:encrypt-in-place *user-auth-cipher*
-                               result)
+    (ironclad:encrypt-in-place *user-auth-cipher* result)
     (ironclad:byte-array-to-hex-string result)))
 
 (defun set-auth-cookie (name password &key (version 1))
@@ -60,16 +59,12 @@
     (if cookie
         (decrypt-auth-cookie cookie))))
 
-(defun password-cache (password)
-  (ironclad:byte-array-to-hex-string
-   (ironclad:digest-sequence :md5
-                             (babel:string-to-octets password :encoding :utf-8))))
 
 (defun run-sing-in (user &key (version 1))
   "Set cookie for user name and password"
   (setf *user* user)
   (set-auth-cookie (user-name user)
-                   (user-password user)
+                   (user-password-digest user)
                    :version version))
 
 (defun run-sign-out ()
@@ -83,6 +78,25 @@
 ;;;; @check-auth-user decorator
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defvar *kdf* (ironclad:make-kdf 'ironclad:pbkdf2 :digest 'ironclad:sha256))
+
+(defun password-digest (password salt)
+  (ironclad:byte-array-to-hex-string
+   (ironclad:derive-key *kdf*
+                        (babel:string-to-octets password :encoding :utf-8)
+                        salt
+                        1000 128)))
+
+(defun make-random-salt ()
+  (let ((salt (make-array 50 :element-type 'ub8)))
+    (dotimes (i (length salt))
+      (setf (aref salt i) (random 256)))
+    salt))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; @check-auth-user decorator
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defclass check-auth-user-route (routes:proxy-route) ())
 
 (defun check-user-auth ()
@@ -90,7 +104,7 @@
     (if (and version name password date)
         (let ((user (user-with-name name)))
           (if (and user
-                   (string= (user-password user)
+                   (string= (user-password-digest user)
                             password)
                    (or (null (user-role user))
                        (member (user-role user) '(:moderator :administrator))))
