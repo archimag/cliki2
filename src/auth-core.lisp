@@ -88,7 +88,7 @@
                         1000 128)))
 
 (defun make-random-salt ()
-  (let ((salt (make-array 50 :element-type 'ub8)))
+  (let ((salt (make-array 50 :element-type '(unsigned-byte 8))))
     (dotimes (i (length salt))
       (setf (aref salt i) (random 256)))
     (ironclad:byte-array-to-hex-string salt)))
