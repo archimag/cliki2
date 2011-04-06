@@ -84,14 +84,14 @@
   (ironclad:byte-array-to-hex-string
    (ironclad:derive-key *kdf*
                         (babel:string-to-octets password :encoding :utf-8)
-                        salt
+                        (babel:string-to-octets salt)
                         1000 128)))
 
 (defun make-random-salt ()
   (let ((salt (make-array 50 :element-type 'ub8)))
     (dotimes (i (length salt))
       (setf (aref salt i) (random 256)))
-    salt))
+    (ironclad:byte-array-to-hex-string salt)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; @check-auth-user decorator
