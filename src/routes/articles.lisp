@@ -52,17 +52,18 @@
   (list :article-history-page
         :article (check-article title)))
 
-(defun find-article-revision (article date)
-  (find date
+(defun find-article-revision (article sha1)
+  (find sha1
         (article-revisions article)
-        :key #'revision-date))
+        :test #'string=
+        :key  #'revision-content-sha1))
 
 (restas:define-route compare-article-revisions ("history/:(title)"
                                                 :method :post)
   (flet ((get-revision (article href)
            (find-article-revision article
                                   (getf (restas:parse-route-url href 'view-article-revision)
-                                        :date))))
+                                        :mark))))
     (let* ((article (check-article title))
            (new (get-revision article (hunchentoot:post-parameter "diff")))
            (old (get-revision article (hunchentoot:post-parameter "old"))))
@@ -72,10 +73,8 @@
             :old (closure-template:escape-html (revision-content old))))))
           
 
-(restas:define-route view-article-revision ("history/:title/:date"
-                                            :parse-vars (list :date #'parse-integer))
+(restas:define-route view-article-revision ("history/:title/:mark")
   (let ((article (check-article title)))
     (list :article-revision-page
           :article article
-          :revision (find-article-revision article date))))
-
+          :revision (find-article-revision article mark))))
