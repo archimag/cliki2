@@ -142,7 +142,7 @@
 
 (defun article-content-head (article &aux (count 200))
   (let* ((revision (article-latest-revision article))
-         (path (content-path article (revision-content-sha1 revision))))
+         (path (content-path article (revision-date revision))))
     (with-output-to-string (out)
       (iter (for char in-file path using #'read-char)
             (for i from 0 below count)
@@ -159,61 +159,23 @@
                  :reader    revision-author)
    (author-ip    :initarg   :author-ip
                  :reader    revision-author-ip)
-   (content-sha1 :initarg   :content-sha1
-                 :reader    revision-content-sha1)
+   (date         :initarg   :date
+                 :reader    revision-date)
    (summary      :initarg   :summary
                  :reader    revision-summary))
   (:metaclass persistent-class))
 
-(defun content-path (article sha1)
-  (merge-pathnames (make-pathname :directory
-                                  (list :relative
-                                        "content"
-                                        (closure-template:encode-uri-component (article-title article)))
-                                  :name sha1)
+(defun content-path (article date)
+  (merge-pathnames (make-pathname :directory (list :relative
+                                                   "content"
+                                                   (closure-template:encode-uri-component (article-title article)))
+                                  :name (write-to-string date))
                    *datadir*))
-
-(cffi:defcstruct %utimbuf
-  (%actime isys:time-t)
-  (%modtime isys:time-t))
-
-(isys:defsyscall (%utime "utime") :int
-  (filename :pointer)
-  (times :pointer))
-
-(defun utime (filename &optional access-time modification-time)
-  (cffi:with-foreign-string (%filename (cffi-sys:native-namestring filename))
-    (cond
-      ((not (and access-time modification-time))
-       (%utime %filename (cffi:null-pointer)))
-      (t (cffi:with-foreign-object (utimbuf '%utimbuf)
-           (setf (cffi:foreign-slot-value utimbuf '%utimbuf '%actime)
-                 access-time)
-           (setf (cffi:foreign-slot-value utimbuf '%utimbuf '%modtime)
-                 modification-time)
-           (%utime %filename utimbuf))))))
-
-(defun save-content (article content &optional date)
-  (let* ((octets (babel:string-to-octets content :encoding :utf-8))
-         (sha1 (ironclad:byte-array-to-hex-string (ironclad:digest-sequence :sha1 octets)))
-         (path (content-path article sha1)))
-    (alexandria:write-byte-vector-into-file octets
-                                            (ensure-directories-exist path)
-                                            :if-exists :supersede
-                                            :if-does-not-exist :create)
-    (when date
-      (let ((unix-time (local-time:timestamp-to-unix (local-time:universal-to-timestamp date))))
-        (utime path unix-time unix-time)))
-    sha1))
 
 (defun revision-content (revision)
   (alexandria:read-file-into-string
-   (content-path (revision-article revision) (revision-content-sha1 revision))))
-
-(defun revision-date (revision)
-  (file-write-date 
    (content-path (revision-article revision)
-                 (revision-content-sha1 revision))))
+                 (revision-date revision))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; changes
@@ -242,14 +204,24 @@
                      (author-ip (hunchentoot:real-remote-addr))
                      (date (get-universal-time))
                      (add-to-index t))
+  
+  (alexandria:write-string-into-file content
+                                     (ensure-directories-exist (content-path article date))
+                                     :if-exists :supersede
+                                     :if-does-not-exist :create)
+
+  (let ((unix-time (local-time:timestamp-to-unix (local-time:universal-to-timestamp date))))
+    (utime (content-path article date) unix-time unix-time))
+                                     
   (add-revision-txn article
                     (make-instance 'revision
                                    :article article
                                    :author author
                                    :author-ip author-ip
-                                   :content-sha1 (save-content article content date)
+                                   :date date
                                    :summary summary)
                     (content-categories content))
+  
   (when add-to-index
     (add-article-to-index (article-title article)
                           content)))

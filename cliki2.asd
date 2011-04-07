@@ -16,8 +16,8 @@
     ((:module "src"
               :components
               ((:file "defmodule")
-               (:file "sendmail" :depends-on ("defmodule"))
-               (:file "model" :depends-on ("defmodule"))
+               (:file "util" :depends-on ("defmodule"))
+               (:file "model" :depends-on ("defmodule" "util"))
                (:file "categories" :depends-on ("defmodule"))
                (:file "markup" :depends-on ("categories" "defmodule"))
                (:file "view" :depends-on ("model" "markup"))
@@ -31,4 +31,4 @@
                          (:file "auth")
                          (:file "specials")
                          (:file "search"))
-                        :depends-on ("view" "sendmail" "auth-core"))))))
+                        :depends-on ("view" "auth-core"))))))
