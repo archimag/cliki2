@@ -173,6 +173,26 @@
                                   :name sha1)
                    *datadir*))
 
+(cffi:defcstruct %utimbuf
+  (%actime isys:time-t)
+  (%modtime isys:time-t))
+
+(isys:defsyscall (%utime "utime") :int
+  (filename :pointer)
+  (times :pointer))
+
+(defun utime (filename &optional access-time modification-time)
+  (cffi:with-foreign-string (%filename (cffi-sys:native-namestring filename))
+    (cond
+      ((not (and access-time modification-time))
+       (%utime %filename (cffi:null-pointer)))
+      (t (cffi:with-foreign-object (utimbuf '%utimbuf)
+           (setf (cffi:foreign-slot-value utimbuf '%utimbuf '%actime)
+                 access-time)
+           (setf (cffi:foreign-slot-value utimbuf '%utimbuf '%modtime)
+                 modification-time)
+           (%utime %filename utimbuf))))))
+
 (defun save-content (article content &optional date)
   (let* ((octets (babel:string-to-octets content :encoding :utf-8))
          (sha1 (ironclad:byte-array-to-hex-string (ironclad:digest-sequence :sha1 octets)))
@@ -183,7 +203,7 @@
                                             :if-does-not-exist :create)
     (when date
       (let ((unix-time (local-time:timestamp-to-unix (local-time:universal-to-timestamp date))))
-        #+sbcl (sb-posix:utime path unix-time unix-time)))
+        (utime path unix-time unix-time)))
     sha1))
 
 (defun revision-content (revision)
