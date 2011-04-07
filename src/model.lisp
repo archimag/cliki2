@@ -56,7 +56,7 @@
 
 (defun user-info-pathname (user)
   (merge-pathnames (make-pathname :directory '(:relative "person")
-                                  :name user)
+                                  :name (user-name user))
                    *datadir*))
 
 (defun user-info (user &aux (path (user-info-pathname user)))
