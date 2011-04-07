@@ -59,7 +59,7 @@
            (list :href (restas:gen-full-url 'view-article-revision
                                             :title title
                                             :mark (revision-content-sha1 revision))
-                 :date (format-time (revision-content-sha1 revision))
+                 :date (format-time (revision-date revision))
                  :author (let ((name (user-name (revision-author revision))))
                            (list :name name
                                  :href (restas:genurl 'view-person

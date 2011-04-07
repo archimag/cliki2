@@ -173,13 +173,18 @@
                                   :name sha1)
                    *datadir*))
 
-(defun save-content (article content)
+(defun save-content (article content &optional date)
   (let* ((octets (babel:string-to-octets content :encoding :utf-8))
-         (sha1 (ironclad:byte-array-to-hex-string (ironclad:digest-sequence :sha1 octets))))
+         (sha1 (ironclad:byte-array-to-hex-string (ironclad:digest-sequence :sha1 octets)))
+         (path (content-path article sha1)))
     (alexandria:write-byte-vector-into-file octets
-                                            (ensure-directories-exist (content-path article sha1))
+                                            (ensure-directories-exist path)
                                             :if-exists :supersede
                                             :if-does-not-exist :create)
+    (when date
+      #+sbcl (sb-posix:utime path
+                             nil
+                             date))
     sha1))
 
 (defun revision-content (revision)
@@ -223,7 +228,7 @@
                                    :article article
                                    :author author
                                    :author-ip author-ip
-                                   :content-sha1 (save-content article content)
+                                   :content-sha1 (save-content article content date)
                                    :summary summary)
                     (content-categories content))
   (when add-to-index
