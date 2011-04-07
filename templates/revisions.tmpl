@@ -45,9 +45,10 @@
 
 {template view-article-history}
     {call base}
-        {param title: 'History of article: ' + $title /}
+        {param title: $title /}
         {param user: $user /}
         {param body}
+            <h1>{$title}</h1>
             <form method="post">
                 <input type="submit" value="Compare selected versions" />
                 <ul id="pagehistory">

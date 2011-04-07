@@ -117,7 +117,7 @@
                             &key article)
   (apply-template drawer
                   'cliki2.view:view-article-history
-                  :title (format nil "History of page \"~A\"" (article-title article))
+                  :title (format nil "History of article: \"~A\"" (article-title article))
                   :revisions (revision-summary-list (article-revisions article))
                   :links (article-action-list article :history)))
 
