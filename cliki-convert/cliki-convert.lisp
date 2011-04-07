@@ -50,7 +50,8 @@
                      (list file)
                      (gethash file-name old-articles)
                      #'< :key (lambda (x)
-                                (parse-integer (or (pathname-type x) "0")))))))
+                                (or (ignore-errors (parse-integer (pathname-type x)))
+                                    0))))))
     ;; sort revisions and discard deleted pages
     (loop for article being the hash-key of old-articles do
          (when (search "*(delete this page)"
