@@ -182,9 +182,8 @@
                                             :if-exists :supersede
                                             :if-does-not-exist :create)
     (when date
-      #+sbcl (sb-posix:utime path
-                             nil
-                             date))
+      (let ((unix-time (local-time:timestamp-to-unix (local-time:universal-to-timestamp date))))
+        #+sbcl (sb-posix:utime path unix-time unix-time)))
     sha1))
 
 (defun revision-content (revision)
