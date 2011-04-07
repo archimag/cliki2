@@ -186,6 +186,11 @@
   (alexandria:read-file-into-string
    (content-path (revision-article revision) (revision-content-sha1 revision))))
 
+(defun revision-date (revision)
+  (file-write-date 
+   (content-path (revision-article revision)
+                 (revision-content-sha1 revision))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; changes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -195,7 +200,10 @@
 (defvar *recent-revisions-lock* (bt:make-lock))
 
 (defun init-recent-revisions ()
-  (replace *recent-revisions* (sort (store-objects-with-class 'revision) #'> :key #'revision-content-sha1))
+  (replace *recent-revisions*
+           (sort (store-objects-with-class 'revision)
+                 #'>
+                 :key #'revision-date))
   (setf *recent-revisions-latest* 0))
 
 (defun get-recent-revisions ()
