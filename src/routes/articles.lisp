@@ -69,7 +69,7 @@
         (article-revisions article)
         :key #'revision-date))
 
-(restas:define-route compare-article-revisions ("diff/:(title)/:(origin-date)-:(modified-date)"
+(restas:define-route compare-article-revisions ("history/:(title)/:(origin-date)-:(modified-date)"
                                                 :parse-vars (list :origin-date #'parse-integer
                                                                   :modified-date #'parse-integer))
   (let* ((article (check-article title)))

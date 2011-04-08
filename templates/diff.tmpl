@@ -68,7 +68,7 @@
 
 {template diff-line}
     <tr>
-        <td class="diff-marker">-</td>
+        <td class="diff-marker">{if $origin}-{/if}</td>
 
         {if $origin}
             <td class="diff-deleteline">
@@ -78,7 +78,7 @@
             <td />
         {/if}
         
-        <td class="diff-marker">+</td>
+        <td class="diff-marker">{if $modified}+{/if}</td>
 
         {if $modified}
             <td class="diff-addline">

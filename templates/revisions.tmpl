@@ -49,19 +49,34 @@
         {param user: $user /}
         {param body}
             <h1>{$title}</h1>
+            
             <form method="post">
                 <input type="submit" value="Compare selected versions" />
+                
                 <ul id="pagehistory">
                     {foreach $revision in $revisions}
                         <li>
-                            <input type="radio" value="{$revision.href}" name="old" />
-                            <input type="radio" value="{$revision.href}" name="diff" />
+
+                            <input type="radio"
+                                   value="{$revision.href}"
+                                   {if isFirst($revision)}style="visibility: hidden;"{/if}
+                                   name="old" />
+                            
+                            <input type="radio"
+                                   value="{$revision.href}"
+                                   {if isLast($revision)}style="visibility: hidden;"{/if}
+                                   name="diff" />
+                            
                             <a href="{$revision.href}">{$revision.date}</a>
+                            
                             {$revision.summary}
+                            
                             <a href="{$revision.author.href}">{$revision.author.name}</a>
                         </li>
                     {/foreach}
                 </ul>
+
+                <input type="submit" value="Compare selected versions" />
             </form>
             {call article-action-links data="$links" /}
         {/param}

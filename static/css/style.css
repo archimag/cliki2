@@ -191,15 +191,14 @@ pre, pre *, .code, .code * { font-family: monospace; }
     padding: 0;
 }
 
-#pagehistory li { margin: 0; padding: 0; line-height: 30px; }
+#pagehistory li { armgin: 0; padding: 0; line-height: 30px; }
 
-/*.diff td { vertical-align: top; }*/
 table.diff { border: none; width: 98%; border-spacing: 4px; table-layout: fixed;}
+table.diff a { text-decoration: none; color: #0077bb; font-size: large;}
 table.diff col.diff-content { width: 48%; }
-
+td.diff-marker {font-size: smaller; text-align: right;}
 td.diff-line-number { font-weight: bold; }
 td.diff-context { font-size: smaller; background-color: #EEE;}
 td.diff-deleteline { font-size: smaller; background-color: #FFA;}
 td.diff-addline { font-size: smaller; background-color: #CFC;}
-
 table.diff span { color: red; }

@@ -31,24 +31,27 @@
                          stream))
           
           ((and origin modified)
-           (let ((diff (com.gigamonkeys.prose-diff::diff-vectors modified origin)))
+           (let ((diff (com.gigamonkeys.prose-diff::diff-vectors
+                        (closure-template:escape-html origin)
+                        (closure-template:escape-html modified))))
              (write-line (cliki2.view:diff-line
                           (list :origin (format-diff-part diff :delete) 
                                 :modified (format-diff-part diff :add)))
                          stream)))
                           
           (t (write-string (cliki2.view:diff-line
-                            (list :origin origin
-                                  :modified modified))
+                            (list :origin (closure-template:escape-html origin)
+                                  :modified (closure-template:escape-html modified)))
                            stream)))))
-              
 
 (defun collect-origin (chunks)
   (iter (for chunk in chunks)
         (case (diff::chunk-kind chunk)
-          ((:common :replace :delete)
+          ((:common :delete)
            (dolist (line (diff::chunk-lines chunk))
              (collect line)))
+          (:replace
+           (collect (format nil "~{~&~A~}" (diff::chunk-lines chunk))))
           (:create
            (dolist (line (diff::chunk-lines chunk))
              (declare (ignore line))
@@ -57,10 +60,12 @@
 (defun collect-modified (chunks)
   (iter (for chunk in chunks)
         (case (diff::chunk-kind chunk)
-          ((:common :insert :create)
+          ((:common  :create)
            (dolist (line (diff::chunk-lines chunk))
              (collect line)))
-          (:delete
+          (:insert
+           (collect (format nil "~{~&~A~}" (diff::chunk-lines chunk))))
+          (:delete 
            (dolist (line (diff::chunk-lines chunk))
              (declare (ignore line))
              (collect nil))))))
