@@ -47,6 +47,11 @@
     {call base}
         {param title: $title /}
         {param user: $user /}
+
+        {param head}
+            <script type="text/javascript" src="/js/history.js"></script>
+        {/param}
+    
         {param body}
             <h1>{$title}</h1>
             
@@ -58,12 +63,12 @@
                         <li>
 
                             <input type="radio"
-                                   value="{$revision.href}"
+                                   value="{$revision.universalTime}"
                                    {if isFirst($revision)}style="visibility: hidden;"{/if}
                                    name="old" />
                             
                             <input type="radio"
-                                   value="{$revision.href}"
+                                   value="{$revision.universalTime}"
                                    {if isLast($revision)}style="visibility: hidden;"{/if}
                                    name="diff" />
                             

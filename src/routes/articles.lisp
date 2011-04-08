@@ -56,13 +56,8 @@
                                                 :method :post)
   (restas:redirect 'compare-article-revisions
                    :title title
-                   :origin-date (getf (restas:parse-route-url (hunchentoot:post-parameter "old")
-                                                              'view-article-revision)
-                                      :date)
-                   :modified-date (getf (restas:parse-route-url (hunchentoot:post-parameter "diff")
-                                                              'view-article-revision)
-                                        :date)))
-  
+                   :origin-date (parse-integer (hunchentoot:post-parameter "old"))
+                   :modified-date (parse-integer (hunchentoot:post-parameter "diff"))))
 
 (defun find-article-revision (article date)
   (find date

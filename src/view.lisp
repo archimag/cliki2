@@ -55,6 +55,7 @@
          (list :href (restas:gen-full-url 'view-article-revision
                                           :title title
                                           :date (revision-date revision))
+               :universal-time (revision-date revision)
                :date (format-time (revision-date revision))
                :author (let ((name (user-name (revision-author revision))))
                          (list :name name
