@@ -70,14 +70,6 @@
              (declare (ignore line))
              (collect nil))))))
  
-(defun concat-chunks (window exclude)
-  (with-output-to-string (out)
-    (dolist (chunk (diff::window-chunks window))
-     (unless (find (diff::chunk-kind chunk) exclude)
-       (dolist (line (diff::chunk-lines chunk))
-         (write-string line out)
-         (terpri out))))))
-
 (defun format-diff-part (vector flag)
   (with-output-to-string (out)
     (iter (for item in (coerce vector 'list))
