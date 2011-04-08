@@ -193,5 +193,13 @@ pre, pre *, .code, .code * { font-family: monospace; }
 
 #pagehistory li { margin: 0; padding: 0; line-height: 30px; }
 
-#diff td { vertical-align: top; }
-#diff span { color: red; }
+/*.diff td { vertical-align: top; }*/
+table.diff { border: none; width: 98%; border-spacing: 4px; table-layout: fixed;}
+table.diff col.diff-content { width: 48%; }
+
+td.diff-line-number { font-weight: bold; }
+td.diff-context { font-size: smaller; background-color: #EEE;}
+td.diff-deleteline { font-size: smaller; background-color: #FFA;}
+td.diff-addline { font-size: smaller; background-color: #CFC;}
+
+table.diff span { color: red; }

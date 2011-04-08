@@ -40,3 +40,9 @@
   (with-input-from-string (i content)
     (external-program:run *sendmail* to :input i)))
 
+;;;; format-time
+
+(defun format-time (universal-time)
+  (apply #'format nil
+         "~D-~2,'0D-~2,'0D ~2,'0D:~2,'0D"
+         (reverse (subseq (multiple-value-list (decode-universal-time universal-time)) 1 6))))

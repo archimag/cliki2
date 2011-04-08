@@ -172,10 +172,12 @@
                                   :name (write-to-string date))
                    *datadir*))
 
+(defun revision-path (revision)
+  (content-path (revision-article revision)
+                (revision-date revision)))
+
 (defun revision-content (revision)
-  (alexandria:read-file-into-string
-   (content-path (revision-article revision)
-                 (revision-date revision))))
+  (alexandria:read-file-into-string (revision-path revision)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; changes

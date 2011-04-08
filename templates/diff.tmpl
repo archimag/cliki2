@@ -1,0 +1,91 @@
+// -*- closure-template-html -*-
+
+{namespace cliki2.view}
+
+{template view-revisions-diff}
+    {call base}
+        {param title: $title /}
+        {param user: $user /}
+        {param body}
+            <h1>{$title}</h1>
+
+            <table class="diff">
+                <colgroup>
+                    <col class="diff-marker">
+			        <col class="diff-content">
+			        <col class="diff-marker">
+			        <col class="diff-content">
+		        </colgroup>
+                <tbody>
+                    <tr>
+                        <th colspan="2">
+                            <a href="{$origin.href}">
+                                Version {$origin.date}
+                            </a>
+                        </th>
+                        
+                        <th colspan="2">
+                            <a href="{$modified.href}">
+                                Version {$modified.date}
+                            </a>
+                        </th>
+                    </tr>
+                    
+                    {$diff |noAutoescape}
+                </tbody>
+            </table>
+
+            {call article-action-links data="$links" /}            
+        {/param}
+    {/call}
+{/template}
+
+
+{template diff-line-number}
+    <tr>
+        <td colspan="2" class="diff-line-number">
+            Line {$originStart}:
+        </td>
+        <td colspan="2" class="diff-line-number">
+            Line {$modifiedStart}:
+        </td>
+    </tr>
+{/template}
+
+{template diff-common-line}
+    <tr>
+        <td class="diff-marker"></td>
+        <td class="diff-context">
+            {$line}
+        </td>
+        
+        <td class="diff-marker"></td>
+        <td class="diff-context">
+            {$line}
+        </td>
+    </tr>
+{/template}
+
+{template diff-line}
+    <tr>
+        <td class="diff-marker">-</td>
+
+        {if $origin}
+            <td class="diff-deleteline">
+                {$origin |noAutoescape}
+            </td>
+        {else}
+            <td />
+        {/if}
+        
+        <td class="diff-marker">+</td>
+
+        {if $modified}
+            <td class="diff-addline">
+                {$modified |noAutoescape}
+            </td>
+        {else}
+            <td />
+        {/if}
+    </tr>
+{/template}

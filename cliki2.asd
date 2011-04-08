@@ -11,7 +11,8 @@
                  #:3bmd
                  #:montezuma
                  #:sanitize
-                 #:com.gigamonkeys.prose-diff)
+                 #:com.gigamonkeys.prose-diff
+                 #:diff)
     :components
     ((:module "src"
               :components
@@ -20,7 +21,8 @@
                (:file "model" :depends-on ("defmodule" "util"))
                (:file "categories" :depends-on ("defmodule"))
                (:file "markup" :depends-on ("categories" "defmodule"))
-               (:file "view" :depends-on ("model" "markup"))
+               (:file "diff" :depends-on ("defmodule"))
+               (:file "view" :depends-on ("model" "markup" "diff"))
                (:file "auth-core" :depends-on ("model"))
                (:module "routes"
                         :components

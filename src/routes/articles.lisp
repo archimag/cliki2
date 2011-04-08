@@ -52,24 +52,33 @@
   (list :article-history-page
         :article (check-article title)))
 
+(restas:define-route view-article-history/post ("history/:(title)"
+                                                :method :post)
+  (restas:redirect 'compare-article-revisions
+                   :title title
+                   :origin-date (getf (restas:parse-route-url (hunchentoot:post-parameter "old")
+                                                              'view-article-revision)
+                                      :date)
+                   :modified-date (getf (restas:parse-route-url (hunchentoot:post-parameter "diff")
+                                                              'view-article-revision)
+                                        :date)))
+  
+
 (defun find-article-revision (article date)
   (find date
         (article-revisions article)
         :key #'revision-date))
 
-(restas:define-route compare-article-revisions ("history/:(title)"
-                                                :method :post)
-  (flet ((get-revision (article href)
-           (find-article-revision article
-                                  (getf (restas:parse-route-url href 'view-article-revision)
-                                        :date))))
-    (let* ((article (check-article title))
-           (new (get-revision article (hunchentoot:post-parameter "diff")))
-           (old (get-revision article (hunchentoot:post-parameter "old"))))
-      (list :revisions-diff-page
-            :article article
-            :new (closure-template:escape-html (revision-content new))
-            :old (closure-template:escape-html (revision-content old))))))
+(restas:define-route compare-article-revisions ("diff/:(title)/:(origin-date)-:(modified-date)"
+                                                :parse-vars (list :origin-date #'parse-integer
+                                                                  :modified-date #'parse-integer))
+  (let* ((article (check-article title)))
+    (list :revisions-diff-page
+          :article article
+          :origin (find-article-revision article origin-date)
+          :modified (find-article-revision article modified-date))))
+  
+                                                
           
 
 (restas:define-route view-article-revision ("history/:title/:date"

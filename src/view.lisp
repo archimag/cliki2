@@ -50,22 +50,18 @@
 
 
 (defun revision-summary-list (revisions)
-  (flet ((format-time (universal-time)
-           (apply #'format nil
-                  "~D-~2,'0D-~2,'0D ~2,'0D:~2,'0D"
-                  (reverse (subseq (multiple-value-list (decode-universal-time universal-time)) 1 6)))))
-    (loop for revision in revisions collect
-         (let ((title (article-title (revision-article revision))))
-           (list :href (restas:gen-full-url 'view-article-revision
-                                            :title title
-                                            :date (revision-date revision))
-                 :date (format-time (revision-date revision))
-                 :author (let ((name (user-name (revision-author revision))))
-                           (list :name name
-                                 :href (restas:genurl 'view-person
-                                                      :name name)))
-                 :title title
-                 :summary (revision-summary revision))))))
+  (loop for revision in revisions collect
+       (let ((title (article-title (revision-article revision))))
+         (list :href (restas:gen-full-url 'view-article-revision
+                                          :title title
+                                          :date (revision-date revision))
+               :date (format-time (revision-date revision))
+               :author (let ((name (user-name (revision-author revision))))
+                         (list :name name
+                               :href (restas:genurl 'view-person
+                                                    :name name)))
+               :title title
+               :summary (revision-summary revision)))))
 
 ;; article
 
@@ -123,34 +119,23 @@
 
 ;;; revisions-diff-page
 
-(defun format-diff-part (vector flag)
-  (with-output-to-string (out)
-    (iter (for item in-vector vector)
-          (with tag = nil)
-
-          (when (and tag
-                     (not (eql (car item) flag)))
-            (setf tag nil)
-            (write-string "</span>"  out))
-
-          (when (and (not tag)
-                     (eql (car item) flag))
-            (setf tag t)
-            (write-string "<span>" out))
-
-          (when (or (eql (car item) :lcs)
-                    (eql (car item) flag))
-            (write-char (cdr item) out)))))
-
-
 (defmethod render-key-data ((drawer drawer) (type (eql :revisions-diff-page))
-                            &key article new old)
-  (let ((diff (com.gigamonkeys.prose-diff::diff-vectors old new)))
-    (apply-template drawer
-                    'cliki2.view:view-revisions-diff
-                    :left (format-diff-part diff :delete)
-                    :right (format-diff-part diff :add)
-                    :links (article-action-list article :diff))))
+                            &key article origin modified
+                            &aux (title (article-title article)))
+  (apply-template drawer
+                  'cliki2.view:view-revisions-diff
+                  :title title
+                  :origin (list :href (restas:genurl 'view-article-revision
+                                                     :title title
+                                                     :date (revision-date origin))
+                                :date (format-time (revision-date origin)))
+                  :modified (list :href (restas:genurl 'view-article-revision
+                                                       :title title
+                                                       :date (revision-date modified))
+                                  :date (format-time (revision-date modified)))
+                  :diff (diff (revision-path origin)
+                              (revision-path modified))
+                  :links (article-action-list article :diff)))
 
 ;; article-revision-page
 
