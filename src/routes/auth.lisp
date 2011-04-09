@@ -111,7 +111,7 @@
                      (cliki2.view:confirmation-mail
                       (list :to to
                             :noreply-mail *noreply-email*
-                            :subject (prepare-subject "Потверждение регистрации")
+                            :subject (prepare-subject "Confirmation of registration")
                             :host (hunchentoot:host)
                             :link (restas:gen-full-url 'confirm-registration
                                                        :mark (invite-mark invite)))))
