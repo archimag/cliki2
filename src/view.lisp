@@ -134,8 +134,8 @@
                                                        :title title
                                                        :date (revision-date modified))
                                   :date (format-time (revision-date modified)))
-                  :diff (diff (revision-path origin)
-                              (revision-path modified))
+                  :diff (format-revisions-diff (revision-path origin)
+                                               (revision-path modified))
                   :links (article-action-list article :diff)))
 
 ;; article-revision-page

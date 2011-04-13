@@ -11,7 +11,6 @@
                  #:3bmd
                  #:montezuma
                  #:sanitize
-                 #:com.gigamonkeys.prose-diff
                  #:diff)
     :components
     ((:module "src"
