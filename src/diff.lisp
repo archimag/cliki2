@@ -33,7 +33,7 @@
           ((and origin modified)
            (write-line (cliki2.view:diff-line
                         (simple-compare-strings (closure-template:escape-html origin)
-                                         (closure-template:escape-html modified)))
+                                                (closure-template:escape-html modified)))
                        stream))
                           
           (t (write-string (cliki2.view:diff-line
