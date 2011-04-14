@@ -3,11 +3,7 @@
 (in-package #:cliki2)
 
 (defun format-revisions-diff (origin modified)
-  (let ((diff:*diff-context-lines* 2))
-    (write-to-string
-     (diff:generate-diff 'wiki-diff
-                         origin
-                         modified))))
+  (diff:format-diff-string 'wiki-diff origin modified))
 
 (defclass wiki-diff (diff:diff) ()
   (:default-initargs
@@ -15,13 +11,13 @@
 
 (defclass wiki-diff-window (diff:diff-window) ())
 
-(defmethod print-object :before ((window wiki-diff-window) stream)
+(defmethod diff:render-diff-window :before ((window wiki-diff-window) stream)
   (write-line (cliki2.view:diff-line-number
                (list :origin-start (diff:original-start-line window)
                      :modified-start (diff:modified-start-line window)))
               stream))
 
-(defmethod print-object ((window wiki-diff-window) stream)
+(defmethod diff:render-diff-window ((window wiki-diff-window) stream)
   (iter (for origin in (select-origin-chunks (diff:window-chunks window)))
         (for modified in (select-modified-chunks (diff:window-chunks window)))
         (cond
@@ -76,28 +72,28 @@
                    (if (char= ch #\Newline)
                        (write-line "<br />" out)
                        (write-char ch out))))
-           (fmt (ses str offset-fun)
+           (fmt (lcs str offset-fun)
              (with-output-to-string (out)
-               (iter (for snake in ses)
-                     (for prev-snake previous snake)
-                     (for cur-snake-start = (funcall offset-fun snake))
-                     (for cur-snake-length = (diff:snake-length snake))
-                     (for prev-snake-end = (if prev-snake
-                                               (+ (funcall offset-fun prev-snake)
-                                                  (diff:snake-length prev-snake))
-                                               0))
-                     (unless (= cur-snake-start prev-snake-end)
+               (iter (for cs in lcs)
+                     (for prev-cs previous cs)
+                     (for cur-cs-start = (funcall offset-fun cs))
+                     (for cur-cs-length = (diff:common-sequence-length cs))
+                     (for prev-cs-end = (if prev-cs
+                                            (+ (funcall offset-fun prev-cs)
+                                               (diff:common-sequence-length prev-cs))
+                                            0))
+                     (unless (= cur-cs-start prev-cs-end)
                        (write-string "<span>" out)
                        (wrt str out 
-                            :start prev-snake-end
-                            :end cur-snake-start)
+                            :start prev-cs-end
+                            :end cur-cs-start)
                        (write-string "</span>" out))
-                     (when (> cur-snake-length 0)
+                     (when (> cur-cs-length 0)
                        (wrt str out
-                            :start cur-snake-start
-                            :end (+ cur-snake-start
-                                    cur-snake-length)))))))
-    (let ((ses (diff:compute-lcs (str2arr origin)
-                                  (str2arr modified))))
-      (list :origin (fmt ses origin #'diff:original-offset)
-            :modified (fmt ses modified #'diff:modified-offset)))))
+                            :start cur-cs-start
+                            :end (+ cur-cs-start
+                                    cur-cs-length)))))))
+    (let ((lcs (diff:compute-lcs (str2arr origin)
+                                 (str2arr modified))))
+      (list :origin (fmt lcs origin #'diff:original-offset)
+            :modified (fmt lcs modified #'diff:modified-offset)))))
