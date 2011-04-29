@@ -44,7 +44,7 @@
 (define-rule article-link (and (and (? #\\) "_(") (+ (and (! #\)) character)) #\))
   (:destructure (start article end)
     (declare (ignore start end))
-    (cons :article-link (cliki2:normalize-name (concat article)))))
+    (cons :article-link (cliki2:normalize-name (text article)))))
 
 (defmethod 3bmd:print-tagged-element ((tag (eql :article-link)) stream title)
   (write-string (cliki2.view:article-link
@@ -58,7 +58,7 @@
 (define-rule person-link (and "_P(" (+ (and (! #\)) character)) #\))
   (:destructure (start name end)
     (declare (ignore start end))
-    (cons :person-link (cliki2:normalize-name (concat name)))))
+    (cons :person-link (cliki2:normalize-name (text name)))))
 
 (defmethod 3bmd:print-tagged-element ((tag (eql :person-link)) stream name)
   (write-string (cliki2.view:person-link
@@ -71,7 +71,7 @@
 (define-rule hyperspec-link (and "_H(" (+ (and (! #\)) character)) #\))
   (:destructure (start symbol end)
     (declare (ignore start end))
-    (cons :hyperspec-link (concat symbol))))
+    (cons :hyperspec-link (text symbol))))
 
 (defmethod 3bmd:print-tagged-element ((tag (eql :hyperspec-link)) stream symbol)
   (write-string (cliki2.view:hyperspec-link
@@ -84,7 +84,7 @@
 (define-rule category-link (and (and (? #\\) "*(") (+ (and (! #\)) character)) #\))
   (:destructure (start category end)
     (declare (ignore start end))
-    (cons :article-link (cliki2:normalize-name (concat category)))))
+    (cons :article-link (cliki2:normalize-name (text category)))))
 
 ;;;; code-block
 
@@ -98,7 +98,7 @@
                              "</code>")
   (:destructure (start w1 code w2 end)
     (declare (ignore start w1 w2 end))
-    (cons :lisp-code-block (concat code))))
+    (cons :lisp-code-block (text code))))
 
 (defmethod 3bmd:print-tagged-element ((tag (eql :lisp-code-block)) stream code)
   (write-string (cliki2.view:code-block
@@ -112,7 +112,7 @@
 
 (define-rule category-name (and (? #\") (+ (category-char-p character)) (? #\"))
   (:lambda (list)
-    (concat (second list))))
+    (text (second list))))
 
 (define-rule category-list (and (and (? #\\) "_/(")
                                 category-name
@@ -163,7 +163,7 @@
 (define-rule package-link (and ":(package" (+ (or #\Tab #\Space #\Newline #\Return)) "\"" (+ (and (! #\") character)) "\")")
   (:destructure (start w1 quote link end)
     (declare (ignore start w1 quote end))
-    (cons :package-link (concat link))))
+    (cons :package-link (text link))))
 
 (defmethod 3bmd:print-tagged-element ((tag (eql :package-link)) stream link)
   (write-string (cliki2.view:package-link (list :href link))
