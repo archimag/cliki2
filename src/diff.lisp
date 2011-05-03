@@ -72,28 +72,21 @@
                    (if (char= ch #\Newline)
                        (write-line "<br />" out)
                        (write-char ch out))))
-           (fmt (lcs str offset-fun)
+           (fmt (regions str offset-fun length-fun)
              (with-output-to-string (out)
-               (iter (for cs in lcs)
-                     (for prev-cs previous cs)
-                     (for cur-cs-start = (funcall offset-fun cs))
-                     (for cur-cs-length = (diff:common-sequence-length cs))
-                     (for prev-cs-end = (if prev-cs
-                                            (+ (funcall offset-fun prev-cs)
-                                               (diff:common-sequence-length prev-cs))
-                                            0))
-                     (unless (= cur-cs-start prev-cs-end)
-                       (write-string "<span>" out)
-                       (wrt str out 
-                            :start prev-cs-end
-                            :end cur-cs-start)
-                       (write-string "</span>" out))
-                     (when (> cur-cs-length 0)
-                       (wrt str out
-                            :start cur-cs-start
-                            :end (+ cur-cs-start
-                                    cur-cs-length)))))))
-    (let ((lcs (diff:compute-lcs (str2arr origin)
-                                 (str2arr modified))))
-      (list :origin (fmt lcs origin #'diff:original-offset)
-            :modified (fmt lcs modified #'diff:modified-offset)))))
+               (iter (for reg in regions)
+                     (for modified-p = (typep reg 'diff:modified-diff-region))
+                     (for start = (funcall offset-fun reg))
+                     (for end = (+ start (funcall length-fun reg)))
+
+                     (when modified-p
+                       (write-string "<span>" out))
+                     
+                     (wrt str out :start start :end end)
+                     
+                     (when modified-p
+                       (write-string "</span>" out))))))
+    (let ((rawdiff (diff:compute-raw-diff (str2arr origin)
+                                          (str2arr modified))))
+      (list :origin (fmt rawdiff origin #'diff:original-start #'diff:original-length)
+            :modified (fmt rawdiff modified #'diff:modified-start #'diff:modified-length)))))
