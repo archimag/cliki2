@@ -2,22 +2,22 @@
 
 (defrule article-link (and #\\ "_(" (+ (and (! #\)) character)) #\))
   (:lambda (list)
-    (concat (cdr list))))
+    (text (cdr list))))
 
 (defrule category-link (and #\\ "*(" (+ (and (! #\)) character)) #\))
   (:lambda (list)
-    (concat (cdr list))))
+    (text (cdr list))))
 
 (defrule hyperspec-link (and "\\#" "H(" (+ (and (! #\)) character)) #\))
   (:lambda (list)
-    (concat #\_ (cdr list))))
+    (text #\_ (cdr list))))
 
 (defun category-char-p (character)
   (not (member character '(#\: #\" #\)))))
 
 (defrule category-name (and (? #\") (+ (category-char-p character)) (? #\"))
   (:lambda (list)
-    (concat (second list))))
+    (text (second list))))
 
 (defrule category-list (and (and "/(")
                             category-name
@@ -32,7 +32,7 @@
            hyperspec-link
            category-list
            character))
-  (:concat t))
+  (:text t))
 
 (defun remove-artefacts (str)
   (parse 'remove-artefacts str))
