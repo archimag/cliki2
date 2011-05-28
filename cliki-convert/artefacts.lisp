@@ -1,10 +1,4 @@
-;;;; artefacts.lisp
-
-(defpackage #:cliki2.converter.artefacts
-  (:use #:cl #:esrap)
-  (:export #:remove-artefacts))
-
-(in-package #:cliki2.converter.artefacts)
+(in-package #:cliki2.converter)
 
 (defrule article-link (and #\\ "_(" (+ (and (! #\)) character)) #\))
   (:lambda (list)
@@ -27,7 +21,7 @@
 
 (defrule category-list (and (and "/(")
                             category-name
-                            (* (and (! #\)) character))                                
+                            (* (and (! #\)) character))
                             ")")
   (:lambda (list)
     (format nil "_/(~A)" (second list))))
